@@ -8,10 +8,26 @@ import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './modules/user/user.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-ioredis-yet';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtStrategy } from './passport/jwt.strategy';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { TransformInterceptor } from './interceptors/transform.interceptor';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    }
+  ],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -39,6 +55,7 @@ import { redisStore } from 'cache-manager-ioredis-yet';
       }),
     }),
     UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

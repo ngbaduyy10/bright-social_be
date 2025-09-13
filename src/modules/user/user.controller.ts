@@ -1,14 +1,11 @@
 import { Controller, Get, Post, Body, Param, Inject } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   @Post()
@@ -17,9 +14,8 @@ export class UserController {
   }
 
   @Get()
-  async findAll() {
-    const cachedUsers = await this.cacheManager.get('users');
-    return cachedUsers;
+  findAll() {
+    return this.userService.findAll();
   }
 
   @Get(':id')

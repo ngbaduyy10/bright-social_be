@@ -20,15 +20,6 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ default: false })
-  is_verified: boolean;
-
-  @Column({ nullable: true })
-  code_id: string;
-
-  @Column({ nullable: true })
-  code_expiration: Date;
-
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
