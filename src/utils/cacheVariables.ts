@@ -1,0 +1,1 @@
+export const PREFIX_USER_CACHE = 'user';

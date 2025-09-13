@@ -4,12 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '@/entities/user.entity';
 import { comparePasswords, hashPassword } from '@/utils/helpers';
+import { CacheService } from '../cache/cache.service';
+import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) 
     private readonly userRepository: Repository<User>,
+    private readonly cacheService: CacheService,
   ) {}
 
   private async getUserByEmail(email: string) {
@@ -46,9 +49,16 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return this.userRepository.findOne({
-      where: { id },
-    });
+  async findOne(id: number) {
+    const user = await this.cacheService.execute(
+      PREFIX_USER_CACHE,
+      id.toString(),
+      async () => {
+        return await this.userRepository.findOne({
+          where: { id },
+        });
+      }
+    );
+    return user;
   }
 }

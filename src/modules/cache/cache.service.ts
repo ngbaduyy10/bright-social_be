@@ -13,8 +13,10 @@ export class CacheService {
   async execute<T>(...args: unknown[]) {
     const fn: any = args.pop();
     const keys: any = args;
+
     let key = this.configService.get<string>('PREFIX_CACHE') || '';
     keys.forEach((char: string) => (key += char + '_'));
+    
     let value = await this.cacheManager.get(key);
     if (!value || JSON.stringify(value) === '{}') {
       value = await fn();
