@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { Public } from '@/decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,5 +19,11 @@ export class AuthController {
   @Public()
   login(@Body() userData: LoginDto) {
     return this.authService.login(userData);
+  }
+
+  @Post('google-login')
+  @Public()
+  googleLogin(@Body() googleData: GoogleLoginDto) {
+    return this.authService.googleLogin(googleData);
   }
 }

@@ -15,7 +15,7 @@ export class UserService {
     private readonly cacheService: CacheService,
   ) {}
 
-  private async getUserByEmail(email: string) {
+  async getUserByEmail(email: string) {
     return await this.userRepository.findOne({
       where: { email },
     });
@@ -39,6 +39,16 @@ export class UserService {
     const user = this.userRepository.create({
       ...createUserDto,
       password: await hashPassword(createUserDto.password),
+    });
+    await this.userRepository.save(user);
+    const { password, ...result } = user;
+    return result;
+  }
+
+  async createGoogleUser(createUserDto: CreateUserDto) {
+    const user = this.userRepository.create({
+      ...createUserDto,
+      password: null,
     });
     await this.userRepository.save(user);
     const { password, ...result } = user;

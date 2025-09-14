@@ -4,7 +4,6 @@ import {
   MaxLength,
   IsEmail,
   IsNotEmpty,
-  Length,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -17,11 +16,6 @@ export class CreateUserDto {
   @MinLength(4)
   @MaxLength(20)
   username: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(10, 13)
-  phone: string;
 
   @IsString()
   @IsNotEmpty()

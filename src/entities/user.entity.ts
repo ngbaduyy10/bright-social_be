@@ -8,7 +8,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   username: string;
 
   @Column({
@@ -17,8 +17,11 @@ export class User {
   })
   phone: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
+
+  @Column({ nullable: true })
+  image: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
