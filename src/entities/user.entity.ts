@@ -1,11 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { Gender } from '@/utils/constant';
+import { BaseEntity } from './base.entity';
 
 @Entity('users')
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class UserEntity extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
@@ -21,10 +19,7 @@ export class User {
   @Column({ nullable: true })
   gender: Gender;
 
-  @Column({
-    nullable: true,
-    unique: true,
-  })
+  @Column({ nullable: true })
   phone: string;
 
   @Column({ nullable: true })
@@ -44,13 +39,4 @@ export class User {
 
   @Column({ nullable: true })
   code_expired_at: Date;
-
-  @Column({ default: true })
-  is_active: boolean;
-
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
-  created_at: Date;
-
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
-  updated_at?: Date;
 }

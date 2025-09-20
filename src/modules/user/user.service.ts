@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '@/entities/user.entity';
+import { UserEntity } from '@/entities/user.entity';
 import { comparePasswords, hashPassword } from '@/utils/helpers';
 import { CacheService } from '../cache/cache.service';
 import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
@@ -10,8 +10,8 @@ import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) 
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(UserEntity) 
+    private readonly userRepository: Repository<UserEntity>,
     private readonly cacheService: CacheService,
   ) {}
 
@@ -59,10 +59,10 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     const user = await this.cacheService.execute(
       PREFIX_USER_CACHE,
-      id.toString(),
+      id,
       async () => {
         return await this.userRepository.findOne({
           where: { id },
