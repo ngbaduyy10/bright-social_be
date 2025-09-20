@@ -7,5 +7,9 @@ export class GoogleLoginDto {
 
   @IsString()
   @IsNotEmpty()
-  username: string;
+  first_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  last_name: string;
 }

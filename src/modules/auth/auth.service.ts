@@ -25,8 +25,8 @@ export class AuthService {
       id: user.id,
       email: user.email,
       username: user.username,
-      phone: user.phone,
-      image: user.image,
+      first_name: user.first_name,
+      last_name: user.last_name,
     };
 
     const token = this.jwtService.sign(payload);
@@ -45,8 +45,8 @@ export class AuthService {
         id: user.id,
         email: user.email,
         username: user.username,
-        phone: user.phone,
-        image: user.image,
+        first_name: user.first_name,
+        last_name: user.last_name,
       };
       
       const token = this.jwtService.sign(payload);
@@ -57,7 +57,8 @@ export class AuthService {
     } else {
       const newUserData: CreateUserDto = {
         email: googleData.email,
-        username: googleData.username,
+        first_name: googleData.first_name,
+        last_name: googleData.last_name,
         password: '',
       };
       
@@ -67,8 +68,8 @@ export class AuthService {
         id: newUser.id,
         email: newUser.email,
         username: newUser.username,
-        phone: newUser.phone,
-        image: newUser.image,
+        first_name: newUser.first_name,
+        last_name: newUser.last_name,
       };
       
       const token = this.jwtService.sign(payload);
