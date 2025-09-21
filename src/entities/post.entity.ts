@@ -1,6 +1,11 @@
-import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
+import { ImageEntity } from './image.entity';
+import { LikeEntity } from './like.entity';
+import { CommentEntity } from './comment.entity';
+import { ShareEntity } from './share.entity';
+import { SaveEntity } from './save.entity';
 
 @Entity('posts')
 export class PostEntity extends BaseEntity {
@@ -13,4 +18,19 @@ export class PostEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
+
+  @OneToMany(() => ImageEntity, (image) => image.post)
+  images: ImageEntity[];
+
+  @OneToMany(() => LikeEntity, (like) => like.post) 
+  likes: LikeEntity[];
+
+  @OneToMany(() => CommentEntity, (comment) => comment.post)
+  comments: CommentEntity[];
+
+  @OneToMany(() => ShareEntity, (share) => share.post)
+  shares: ShareEntity[];  
+
+  @OneToMany(() => SaveEntity, (save) => save.post)
+  saves: SaveEntity[];
 }

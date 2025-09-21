@@ -1,6 +1,8 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { Gender } from '@/utils/constant';
 import { BaseEntity } from './base.entity';
+import { PostEntity } from './post.entity';
+import { StoryEntity } from './story.entity';
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
@@ -39,4 +41,10 @@ export class UserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   code_expired_at: Date;
+
+  @OneToMany(() => PostEntity, (post) => post.user)
+  posts: PostEntity[];
+
+  @OneToMany(() => StoryEntity, (story) => story.user)
+  stories: StoryEntity[];
 }
