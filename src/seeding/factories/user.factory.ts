@@ -10,6 +10,7 @@ export default setSeederFactory(UserEntity, async (): Promise<UserEntity> => {
   user.last_name = faker.person.lastName();
   user.email = faker.internet.email();
   user.username = faker.internet.username();
+  user.is_verified = true;
   user.image = faker.image.avatar();
   user.cover_image = faker.image.url();
   user.bio = faker.lorem.sentence();

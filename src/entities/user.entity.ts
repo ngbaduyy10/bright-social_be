@@ -9,7 +9,7 @@ export class UserEntity extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   username: string;
 
   @Column({ nullable: true })
@@ -35,6 +35,9 @@ export class UserEntity extends BaseEntity {
 
   @Column({ nullable: true })
   bio: string;
+
+  @Column({ default: false })
+  is_verified: boolean;
 
   @Column({ nullable: true })
   code: string;
