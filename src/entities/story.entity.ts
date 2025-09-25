@@ -12,10 +12,13 @@ export class StoryEntity extends BaseEntity {
   content: string;
 
   @Column({ nullable: true })
-  image: string;
+  url: string;
 
   @Column({ default: StoryType.TEXT })
   type: StoryType;
+
+  @Column({ nullable: true })
+  background_color: string;
 
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
