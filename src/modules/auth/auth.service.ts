@@ -1,19 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
-
+import { EmailService } from '../email/email.service';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { EmailVerificationService } from './email-verification.service';
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+    private readonly emailVerificationService: EmailVerificationService,
   ) {}
 
   async register(userData: CreateUserDto) {
-    return await this.usersService.create(userData);
+    const user = await this.usersService.create(userData);
+
+    const verificationToken =
+      this.emailVerificationService.generateVerificationToken(
+        user.email,
+        user.id,
+      );
+
+    this.sendVerificationEmailAsync(
+      user.email,
+      verificationToken,
+      user.first_name || 'User',
+    );
+
+    return {
+      message:
+        'Registration successful! Please check your email to verify your account.',
+      email: user.email,
+    };
+  }
+
+  private sendVerificationEmailAsync(
+    email: string,
+    token: string,
+    userName: string,
+  ): void {
+    Promise.resolve().then(async () => {
+      try {
+        await this.emailService.sendVerificationEmail(email, token, userName);
+      } catch (error) {
+        console.error(`Failed to send verification email to ${email}:`, error);
+        //Note:send email error, implement retry logic
+      }
+    });
   }
 
   async login(userData: LoginDto) {
@@ -32,15 +69,15 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
     return {
       access_token: token,
-      user,
+      user: user,
     };
   }
 
   async googleLogin(googleData: GoogleLoginDto) {
-    let user = await this.usersService.getUserByEmail(googleData.email);
-    
+    const user = await this.usersService.getUserByEmail(googleData.email);
+
     if (user) {
-      const { password, ...userWithoutPassword } = user;
+      const { password, ...user_filtered } = user;
       const payload = {
         id: user.id,
         email: user.email,
@@ -48,11 +85,11 @@ export class AuthService {
         first_name: user.first_name,
         last_name: user.last_name,
       };
-      
+
       const token = this.jwtService.sign(payload);
       return {
         access_token: token,
-        user: userWithoutPassword,
+        user: user_filtered,
       };
     } else {
       const newUserData: CreateUserDto = {
@@ -61,9 +98,9 @@ export class AuthService {
         last_name: googleData.last_name,
         password: '',
       };
-      
+
       const newUser = await this.usersService.createGoogleUser(newUserData);
-      
+
       const payload = {
         id: newUser.id,
         email: newUser.email,
@@ -71,12 +108,111 @@ export class AuthService {
         first_name: newUser.first_name,
         last_name: newUser.last_name,
       };
-      
+
       const token = this.jwtService.sign(payload);
       return {
         access_token: token,
-        user: newUser,
+        user: user,
       };
     }
+  }
+
+  async verifyEmail(verifyEmailDto: VerifyEmailDto) {
+    try {
+      const { userId } = this.emailVerificationService.verifyToken(
+        verifyEmailDto.token,
+      );
+
+      const user = await this.usersService.findById(userId);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+
+      if (user.is_verified) {
+        throw new BadRequestException('Email is already verified');
+      }
+
+      await this.usersService.markEmailAsVerified(userId);
+
+      try {
+        await this.emailService.sendWelcomeEmail(
+          user.email,
+          user.first_name || 'User',
+        );
+      } catch (emailError) {
+        console.log(
+          'Failed to send welcome email, but verification succeeded:',
+          emailError,
+        );
+      }
+
+      return {
+        message: 'Email verified successfully! Welcome to Bright Social.',
+        user: {
+          id: user.id,
+          email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          is_verified: true,
+        },
+      };
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new BadRequestException('Verification token has expired');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new BadRequestException('Invalid verification token');
+      }
+      if (error.name === 'NotBeforeError') {
+        throw new BadRequestException('Verification token is not yet valid');
+      }
+      if (error.message?.includes('Token is required')) {
+        throw new BadRequestException('Verification token is required');
+      }
+      if (error.message?.includes('Invalid token type')) {
+        throw new BadRequestException('Invalid verification token type');
+      }
+      if (
+        error.message?.includes('Token missing required fields') ||
+        error.message?.includes('Token contains invalid field types') ||
+        error.message?.includes('Invalid token structure')
+      ) {
+        throw new BadRequestException('Invalid verification token format');
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      console.log('Email verification error:', error);
+      throw new BadRequestException('Email verification failed');
+    }
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.usersService.getUserByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.is_verified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    const verificationToken =
+      this.emailVerificationService.generateVerificationToken(
+        user.email,
+        user.id,
+      );
+
+    this.sendVerificationEmailAsync(
+      user.email,
+      verificationToken,
+      user.first_name || 'User',
+    );
+
+    return {
+      message: 'Verification email sent successfully!',
+    };
   }
 }

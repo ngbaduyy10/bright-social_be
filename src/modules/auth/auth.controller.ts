@@ -4,6 +4,7 @@ import { Public } from '@/decorators/public.decorator';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,5 +26,17 @@ export class AuthController {
   @Public()
   googleLogin(@Body() googleData: GoogleLoginDto) {
     return this.authService.googleLogin(googleData);
+  }
+
+  @Post('verify-email')
+  @Public()
+  verifyEmail(@Body() verifyEmailDto: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailDto);
+  }
+
+  @Post('resend-verification')
+  @Public()
+  resendVerificationEmail(@Body('email') email: string) {
+    return this.authService.resendVerificationEmail(email);
   }
 }

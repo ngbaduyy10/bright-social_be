@@ -36,6 +36,9 @@ export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   bio: string;
 
+  @Column({ default: false })
+  is_verified: boolean;
+
   @Column({ nullable: true })
   code: string;
 
