@@ -30,14 +30,47 @@ export class UserService {
     throw new UnauthorizedException('Invalid email or password');
   }
 
+  private async generateRandomUsername(firstName: string, lastName: string): Promise<string> {
+    const baseUsername = `${firstName.toLowerCase()}${lastName.toLowerCase()}`;
+    let username = baseUsername;
+    let counter = 1;
+
+    while (true) {
+      const existingUser = await this.userRepository.findOne({
+        where: { username },
+      });
+      
+      if (!existingUser) {
+        return username;
+      }
+      
+      const randomNum = Math.floor(Math.random() * 1000) + 1;
+      username = `${baseUsername}${randomNum}`;
+      counter++;
+      
+      if (counter > 100) {
+        username = `${baseUsername}${Date.now()}`;
+        break;
+      }
+    }
+    
+    return username;
+  }
+
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.getUserByEmail(createUserDto.email);
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
 
+    const username = await this.generateRandomUsername(
+      createUserDto.first_name,
+      createUserDto.last_name
+    );
+
     const user = this.userRepository.create({
       ...createUserDto,
+      username,
       password: await hashPassword(createUserDto.password),
     });
     await this.userRepository.save(user);
@@ -46,8 +79,14 @@ export class UserService {
   }
 
   async createGoogleUser(createUserDto: CreateUserDto) {
+    const username = await this.generateRandomUsername(
+      createUserDto.first_name,
+      createUserDto.last_name
+    );
+
     const user = this.userRepository.create({
       ...createUserDto,
+      username,
       password: null,
     });
     await this.userRepository.save(user);
