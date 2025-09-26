@@ -52,7 +52,7 @@ describe('AuthController', () => {
           email: 'test@example.com',
           first_name: 'John',
           last_name: 'Doe',
-          email_verified: true,
+          is_verified: true,
         },
       };
 

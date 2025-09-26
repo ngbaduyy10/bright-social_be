@@ -105,7 +105,7 @@ describe('Email Verification (e2e)', () => {
           email: 'verify@example.com',
           first_name: 'Jane',
           last_name: 'Smith',
-          email_verified: true,
+          is_verified: true,
         },
       });
 

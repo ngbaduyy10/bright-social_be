@@ -80,7 +80,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        email_verified: false,
+        is_verified: false,
       };
 
       const mockToken = 'jwt-verification-token';
@@ -128,7 +128,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        email_verified: false,
+        is_verified: false,
       };
 
       mockUserService.create.mockResolvedValue(mockUser);
@@ -162,7 +162,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        email_verified: false,
+        is_verified: false,
       };
 
       mockJwtService.verify.mockReturnValue(mockDecodedToken);
@@ -192,7 +192,7 @@ describe('AuthService', () => {
           email: mockUser.email,
           first_name: mockUser.first_name,
           last_name: mockUser.last_name,
-          email_verified: true,
+          is_verified: true,
         },
       });
     });
@@ -261,7 +261,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        email_verified: true, // Already verified
+        is_verified: true, // Already verified
       };
 
       mockJwtService.verify.mockReturnValue(mockDecodedToken);
@@ -327,7 +327,7 @@ describe('AuthService', () => {
         id: '123',
         email: 'test@example.com',
         first_name: 'John',
-        email_verified: false,
+        is_verified: false,
       };
       const mockToken = 'new-verification-token';
 
@@ -379,7 +379,7 @@ describe('AuthService', () => {
         id: '123',
         email: 'verified@example.com',
         first_name: 'John',
-        email_verified: true, // Already verified
+        is_verified: true, // Already verified
       };
 
       mockUserService.getUserByEmail.mockResolvedValue(mockUser);

@@ -33,18 +33,20 @@ export class UserService {
     }
 
     // Check if email is verified
-    if (!user.email_verified) {
+    if (!user.is_verified) {
       throw new UnauthorizedException(
         'Please verify your email before logging in',
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...result } = user;
     return result;
   }
 
-  private async generateRandomUsername(firstName: string, lastName: string): Promise<string> {
+  private async generateRandomUsername(
+    firstName: string,
+    lastName: string,
+  ): Promise<string> {
     const baseUsername = `${firstName.toLowerCase()}${lastName.toLowerCase()}`;
     let username = baseUsername;
     let counter = 1;
@@ -53,21 +55,21 @@ export class UserService {
       const existingUser = await this.userRepository.findOne({
         where: { username },
       });
-      
+
       if (!existingUser) {
         return username;
       }
-      
+
       const randomNum = Math.floor(Math.random() * 1000) + 1;
       username = `${baseUsername}${randomNum}`;
       counter++;
-      
+
       if (counter > 100) {
         username = `${baseUsername}${Date.now()}`;
         break;
       }
     }
-    
+
     return username;
   }
 
@@ -79,7 +81,7 @@ export class UserService {
 
     const username = await this.generateRandomUsername(
       createUserDto.first_name,
-      createUserDto.last_name
+      createUserDto.last_name,
     );
 
     const user = this.userRepository.create({
@@ -95,7 +97,7 @@ export class UserService {
   async createGoogleUser(createUserDto: CreateUserDto) {
     const username = await this.generateRandomUsername(
       createUserDto.first_name,
-      createUserDto.last_name
+      createUserDto.last_name,
     );
 
     const user = this.userRepository.create({
@@ -126,7 +128,7 @@ export class UserService {
   }
 
   async markEmailAsVerified(userId: string): Promise<void> {
-    await this.userRepository.update(userId, { email_verified: true });
+    await this.userRepository.update(userId, { is_verified: true });
     await this.cacheService.delete(PREFIX_USER_CACHE, userId);
   }
 

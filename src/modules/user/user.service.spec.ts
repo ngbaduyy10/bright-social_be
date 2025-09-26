@@ -6,15 +6,25 @@ import { UserService } from './user.service';
 import { UserEntity } from '@/entities/user.entity';
 import { CacheService } from '../cache/cache.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { comparePasswords, hashPassword } from '@/utils/helpers';
+
+// Mock the helper functions
 jest.mock('@/utils/helpers', () => ({
   hashPassword: jest.fn().mockResolvedValue('hashedPassword'),
   comparePasswords: jest.fn(),
 }));
 
+const mockedComparePasswords = comparePasswords as jest.MockedFunction<
+  typeof comparePasswords
+>;
+const mockedHashPassword = hashPassword as jest.MockedFunction<
+  typeof hashPassword
+>;
+
 describe('UserService', () => {
   let service: UserService;
   let userRepository: jest.Mocked<Repository<UserEntity>>;
-  let cacheService: jest.Mocked<CacheService>;
+  // let cacheService: jest.Mocked<CacheService>;
 
   const mockUser: Partial<UserEntity> = {
     id: '1',
@@ -22,7 +32,7 @@ describe('UserService', () => {
     first_name: 'John',
     last_name: 'Doe',
     password: 'hashedPassword',
-    email_verified: true,
+    is_verified: true,
   };
 
   const mockUserUnverified: Partial<UserEntity> = {
@@ -31,7 +41,7 @@ describe('UserService', () => {
     first_name: 'Jane',
     last_name: 'Doe',
     password: 'hashedPassword',
-    email_verified: false,
+    is_verified: false,
   };
 
   beforeEach(async () => {
@@ -64,7 +74,7 @@ describe('UserService', () => {
 
     service = module.get<UserService>(UserService);
     userRepository = module.get(getRepositoryToken(UserEntity));
-    cacheService = module.get(CacheService);
+    // cacheService = module.get(CacheService);
   });
 
   it('should be defined', () => {
@@ -72,11 +82,9 @@ describe('UserService', () => {
   });
 
   describe('validateUser', () => {
-    const { comparePasswords } = require('@/utils/helpers');
-
     it('should return user without password when credentials are valid and email is verified', async () => {
       userRepository.findOne.mockResolvedValue(mockUser as UserEntity);
-      comparePasswords.mockResolvedValue(true);
+      (comparePasswords as jest.Mock).mockResolvedValue(true);
 
       const result = await service.validateUser('test@example.com', 'password');
 
@@ -85,7 +93,7 @@ describe('UserService', () => {
         email: 'test@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        email_verified: true,
+        is_verified: true,
       });
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
@@ -102,7 +110,7 @@ describe('UserService', () => {
 
     it('should throw UnauthorizedException when password is incorrect', async () => {
       userRepository.findOne.mockResolvedValue(mockUser as UserEntity);
-      comparePasswords.mockResolvedValue(false);
+      mockedComparePasswords.mockResolvedValue(false);
 
       await expect(
         service.validateUser('test@example.com', 'wrongpassword'),
@@ -113,7 +121,7 @@ describe('UserService', () => {
       userRepository.findOne.mockResolvedValue(
         mockUserUnverified as UserEntity,
       );
-      comparePasswords.mockResolvedValue(true);
+      mockedComparePasswords.mockResolvedValue(true);
 
       await expect(
         service.validateUser('unverified@example.com', 'password'),
@@ -166,7 +174,7 @@ describe('UserService', () => {
         email: 'test@example.com',
         first_name: 'John',
         last_name: 'Doe',
-        email_verified: true,
+        is_verified: true,
       });
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { email: 'new@example.com' },
