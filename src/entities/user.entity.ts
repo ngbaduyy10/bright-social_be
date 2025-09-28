@@ -18,7 +18,7 @@ export class UserEntity extends BaseEntity {
   @Column({ nullable: true })
   last_name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'enum', enum: Gender })
   gender: Gender;
 
   @Column({ nullable: true })

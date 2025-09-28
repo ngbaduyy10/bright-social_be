@@ -14,7 +14,11 @@ export class StoryEntity extends BaseEntity {
   @Column({ nullable: true })
   url: string;
 
-  @Column({ default: StoryType.TEXT })
+  @Column({ 
+    type: 'enum', 
+    enum: StoryType, 
+    default: StoryType.TEXT 
+  })
   type: StoryType;
 
   @Column({ nullable: true })
