@@ -12,13 +12,14 @@ import StorySeeder from './seeds/story.seed';
 import StoryFactory from './factories/story.factory';
 import FriendSeeder from './seeds/friend.seed';
 import FriendFactory from './factories/friend.factory';
+import MainSeeder from './seeds/main.seed';
 
 (async () => {
     const options: DataSourceOptions & SeederOptions = {
         ...databaseConfig,
         dropSchema: true,
         synchronize: true,
-        seeds: [UserSeeder, PostSeeder, ImageSeeder, StorySeeder, FriendSeeder],
+        seeds: [UserSeeder, PostSeeder, ImageSeeder, StorySeeder, FriendSeeder, MainSeeder],
         factories: [UserFactory, PostFactory, ImageFactory, StoryFactory, FriendFactory]
     };
 

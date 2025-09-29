@@ -39,12 +39,6 @@ export class UserEntity extends BaseEntity {
   @Column({ default: false })
   is_verified: boolean;
 
-  @Column({ nullable: true })
-  code: string;
-
-  @Column({ nullable: true })
-  code_expired_at: Date;
-
   @OneToMany(() => PostEntity, (post) => post.user)
   posts: PostEntity[];
 
