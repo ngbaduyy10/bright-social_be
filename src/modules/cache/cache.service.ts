@@ -16,7 +16,7 @@ export class CacheService {
 
     let key = this.configService.get<string>('PREFIX_CACHE') || '';
     keys.forEach((char: string) => (key += char + '_'));
-    
+
     let value = await this.cacheManager.get(key);
     if (!value || JSON.stringify(value) === '{}') {
       value = await fn();
@@ -50,5 +50,9 @@ export class CacheService {
 
   async clearAll() {
     await this.cacheManager.reset();
+  }
+
+  async delete(...args: unknown[]) {
+    return this.removeKey(...args);
   }
 }
