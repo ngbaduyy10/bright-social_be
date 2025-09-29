@@ -53,6 +53,7 @@ export class CacheService {
   }
 
   async delete(...args: unknown[]) {
+    // Alias for removeKey method
     return this.removeKey(...args);
   }
 }

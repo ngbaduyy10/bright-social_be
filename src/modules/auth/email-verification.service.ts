@@ -18,6 +18,14 @@ export class EmailVerificationService {
   }
 
   verifyToken(token: string): { email: string; userId: string } {
+    if (typeof token !== 'string') {
+      throw new Error('Token must be a string');
+    }
+
+    if (!token?.trim()) {
+      throw new Error('Token is required');
+    }
+
     const decoded = this.jwtService.verify(token);
 
     if (!decoded || typeof decoded !== 'object') {
@@ -29,10 +37,12 @@ export class EmailVerificationService {
     }
 
     if (
+      !decoded.email ||
+      !decoded.userId ||
       typeof decoded.email !== 'string' ||
       typeof decoded.userId !== 'string'
     ) {
-      throw new Error('Invalid required fields');
+      throw new Error('Token missing or invalid required fields');
     }
 
     return {

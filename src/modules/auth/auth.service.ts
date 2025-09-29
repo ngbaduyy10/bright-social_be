@@ -25,7 +25,7 @@ export class AuthService {
         user.id,
       );
 
-    await this.emailService.sendVerificationEmail(
+    this.sendVerificationEmailAsync(
       user.email,
       verificationToken,
       user.first_name || 'User',
@@ -36,6 +36,21 @@ export class AuthService {
         'Registration successful! Please check your email to verify your account.',
       email: user.email,
     };
+  }
+
+  private sendVerificationEmailAsync(
+    email: string,
+    token: string,
+    userName: string,
+  ): void {
+    Promise.resolve().then(async () => {
+      try {
+        await this.emailService.sendVerificationEmail(email, token, userName);
+      } catch (error) {
+        console.error(`Failed to send verification email to ${email}:`, error);
+        //Note:send email error, implement retry logic
+      }
+    });
   }
 
   async login(userData: LoginDto) {
@@ -157,10 +172,18 @@ export class AuthService {
       if (error.message?.includes('Invalid token type')) {
         throw new BadRequestException('Invalid verification token type');
       }
+      if (
+        error.message?.includes('Token missing required fields') ||
+        error.message?.includes('Token contains invalid field types') ||
+        error.message?.includes('Invalid token structure')
+      ) {
+        throw new BadRequestException('Invalid verification token format');
+      }
 
       if (error instanceof BadRequestException) {
         throw error;
       }
+      console.log('Email verification error:', error);
       throw new BadRequestException('Email verification failed');
     }
   }
@@ -182,7 +205,7 @@ export class AuthService {
         user.id,
       );
 
-    await this.emailService.sendVerificationEmail(
+    this.sendVerificationEmailAsync(
       user.email,
       verificationToken,
       user.first_name || 'User',

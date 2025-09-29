@@ -9,7 +9,7 @@ export enum AdminRole {
   SUPER_ADMIN = 'super_admin',
 }
 
-export enum FriendRequestStatus {
+export enum FriendStatus {
   PENDING = 'pending',
   ACCEPTED = 'accepted',
   REJECTED = 'rejected',

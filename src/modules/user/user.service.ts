@@ -32,6 +32,10 @@ export class UserService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+<<<<<<< HEAD
+=======
+    // Check if email is verified
+>>>>>>> origin/feature/email-verification
     if (!user.is_verified) {
       throw new UnauthorizedException(
         'Please verify your email before logging in',
@@ -40,6 +44,39 @@ export class UserService {
 
     const { password: _, ...result } = user;
     return result;
+<<<<<<< HEAD
+=======
+  }
+
+  private async generateRandomUsername(
+    firstName: string,
+    lastName: string,
+  ): Promise<string> {
+    const baseUsername = `${firstName.toLowerCase()}${lastName.toLowerCase()}`;
+    let username = baseUsername;
+    let counter = 1;
+
+    while (true) {
+      const existingUser = await this.userRepository.findOne({
+        where: { username },
+      });
+
+      if (!existingUser) {
+        return username;
+      }
+
+      const randomNum = Math.floor(Math.random() * 1000) + 1;
+      username = `${baseUsername}${randomNum}`;
+      counter++;
+
+      if (counter > 100) {
+        username = `${baseUsername}${Date.now()}`;
+        break;
+      }
+    }
+
+    return username;
+>>>>>>> origin/feature/email-verification
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -48,8 +85,14 @@ export class UserService {
       throw new BadRequestException('Email already exists');
     }
 
+    const username = await this.generateRandomUsername(
+      createUserDto.first_name,
+      createUserDto.last_name,
+    );
+
     const user = this.userRepository.create({
       ...createUserDto,
+      username,
       password: await hashPassword(createUserDto.password),
     });
     await this.userRepository.save(user);
@@ -58,8 +101,14 @@ export class UserService {
   }
 
   async createGoogleUser(createUserDto: CreateUserDto) {
+    const username = await this.generateRandomUsername(
+      createUserDto.first_name,
+      createUserDto.last_name,
+    );
+
     const user = this.userRepository.create({
       ...createUserDto,
+      username,
       password: null,
     });
     await this.userRepository.save(user);
@@ -86,10 +135,28 @@ export class UserService {
 
   async markEmailAsVerified(userId: string): Promise<void> {
     await this.userRepository.update(userId, { is_verified: true });
+<<<<<<< HEAD
     await this.cacheService.removeKey(PREFIX_USER_CACHE, userId);
+=======
+    await this.cacheService.delete(PREFIX_USER_CACHE, userId);
+>>>>>>> origin/feature/email-verification
   }
 
   async findById(id: string): Promise<UserEntity | null> {
     return await this.userRepository.findOne({ where: { id } });
   }
+<<<<<<< HEAD
+=======
+
+  async saveVerificationToken(userId: string, token: string): Promise<void> {
+    await this.userRepository.update(userId, { code: token });
+    await this.cacheService.delete(PREFIX_USER_CACHE, userId);
+  }
+
+  async getUserByVerificationToken(token: string): Promise<UserEntity | null> {
+    return await this.userRepository.findOne({
+      where: { code: token },
+    });
+  }
+>>>>>>> origin/feature/email-verification
 }

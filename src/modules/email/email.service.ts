@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { google } from 'googleapis';
+<<<<<<< HEAD
 // import { CacheService } from '../cache/cache.service';
 @Injectable()
 export class EmailService {
@@ -24,12 +25,43 @@ export class EmailService {
       });
       const accessToken = await oAuth2Client.getAccessToken();
       return accessToken.token || '';
+=======
+
+@Injectable()
+export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
+  private readonly OAUTH_USER = process.env.EMAIL_USER || '';
+
+  //Note: can still implement token cache
+  private async getAccessToken(): Promise<string> {
+    try {
+      this.logger.log('Fetching access token from Google...');
+      const oAuth2Client = new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        'https://developers.google.com/oauthplayground',
+      );
+
+      oAuth2Client.setCredentials({
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+      });
+
+      const accessTokenResponse = await oAuth2Client.getAccessToken();
+      const accessToken = accessTokenResponse.token || '';
+
+      if (!accessToken) {
+        throw new Error('Empty access token received from Google');
+      }
+
+      return accessToken;
+>>>>>>> origin/feature/email-verification
     } catch (error) {
       this.logger.error('Failed to retrieve access token:', error);
       throw new Error('Failed to retrieve access token');
     }
   }
 
+<<<<<<< HEAD
   private async createTransporter() {
     const accessToken = await this.getAccessToken();
 
@@ -45,26 +77,60 @@ export class EmailService {
       },
     });
   }
+=======
+  private async createTransporter(): Promise<nodemailer.Transporter> {
+    try {
+      const accessToken = await this.getAccessToken();
+
+      return nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          type: 'OAuth2',
+          user: this.OAUTH_USER,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+          accessToken: accessToken,
+        },
+      });
+    } catch (error) {
+      this.logger.error('Failed to create transporter:', error);
+      throw error;
+    }
+  }
+
+>>>>>>> origin/feature/email-verification
   async sendVerificationEmail(
     email: string,
     token: string,
     userName: string,
   ): Promise<void> {
     try {
+<<<<<<< HEAD
       const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
 
+=======
+      const transporter = await this.createTransporter();
+
+      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
+>>>>>>> origin/feature/email-verification
       const htmlContent = this.getVerificationEmailTemplate(
         userName,
         verificationUrl,
       );
 
       const mailOptions = {
+<<<<<<< HEAD
         from: `"Bright Social" <${process.env.EMAIL_USER}>`,
+=======
+        from: `"Bright Social" <${this.OAUTH_USER}>`,
+>>>>>>> origin/feature/email-verification
         to: email,
         subject: '🎉 Welcome to Bright Social - Verify Your Email',
         html: htmlContent,
       };
 
+<<<<<<< HEAD
       const result = await this.transporter.sendMail(mailOptions);
       this.logger.log(
         `Verification email sent to ${email}. MessageId: ${result.messageId}`,
@@ -72,6 +138,15 @@ export class EmailService {
     } catch (error) {
       this.logger.error(
         `Failed to send verification email to ${email}:`,
+=======
+      const result = await transporter.sendMail(mailOptions);
+      this.logger.log(
+        `✅ Verification email sent to ${email}. MessageId: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to send verification email to ${email}:`,
+>>>>>>> origin/feature/email-verification
         error,
       );
       throw new Error('Failed to send verification email');
@@ -133,6 +208,11 @@ export class EmailService {
 
   async sendWelcomeEmail(email: string, userName: string): Promise<void> {
     try {
+<<<<<<< HEAD
+=======
+      const transporter = await this.createTransporter();
+
+>>>>>>> origin/feature/email-verification
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>🎊 Welcome to Bright Social, ${userName}!</h2>
@@ -146,16 +226,29 @@ export class EmailService {
         </div>
       `;
 
+<<<<<<< HEAD
       await this.transporter.sendMail({
         from: `"Bright Social" <${process.env.EMAIL_USER}>`,
+=======
+      const result = await transporter.sendMail({
+        from: `"Bright Social" <${this.OAUTH_USER}>`,
+>>>>>>> origin/feature/email-verification
         to: email,
         subject: '🎊 Welcome to Bright Social!',
         html: htmlContent,
       });
 
+<<<<<<< HEAD
       this.logger.log(`Welcome email sent to ${email}`);
     } catch (error) {
       this.logger.error(`Failed to send welcome email to ${email}:`, error);
+=======
+      this.logger.log(
+        `✅ Welcome email sent to ${email}. MessageId: ${result.messageId}`,
+      );
+    } catch (error) {
+      this.logger.error(`❌ Failed to send welcome email to ${email}:`, error);
+>>>>>>> origin/feature/email-verification
     }
   }
 }

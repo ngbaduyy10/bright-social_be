@@ -10,19 +10,19 @@ export class AdminEntity extends BaseEntity {
   @Column({ nullable: true })
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   username: string;
 
   @Column({ nullable: true })
   first_name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'enum', enum: Gender })
   gender: Gender;
   
   @Column({ nullable: true })
   last_name: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'enum', enum: AdminRole })
   role: AdminRole;
 
   @Column({ nullable: true })

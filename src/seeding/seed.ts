@@ -8,14 +8,18 @@ import PostSeeder from './seeds/post.seed';
 import PostFactory from './factories/post.factory';
 import ImageSeeder from './seeds/image.seed';
 import ImageFactory from './factories/image.factory';
+import StorySeeder from './seeds/story.seed';
+import StoryFactory from './factories/story.factory';
+import FriendSeeder from './seeds/friend.seed';
+import FriendFactory from './factories/friend.factory';
 
 (async () => {
     const options: DataSourceOptions & SeederOptions = {
         ...databaseConfig,
         dropSchema: true,
         synchronize: true,
-        seeds: [UserSeeder, PostSeeder, ImageSeeder],
-        factories: [UserFactory, PostFactory, ImageFactory]
+        seeds: [UserSeeder, PostSeeder, ImageSeeder, StorySeeder, FriendSeeder],
+        factories: [UserFactory, PostFactory, ImageFactory, StoryFactory, FriendFactory]
     };
 
     const dataSource = new DataSource(options);
