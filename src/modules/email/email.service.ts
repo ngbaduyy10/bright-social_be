@@ -1,31 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { google } from 'googleapis';
-<<<<<<< HEAD
-// import { CacheService } from '../cache/cache.service';
-@Injectable()
-export class EmailService {
-  // private readonly cacheService: CacheService;
-  private readonly logger = new Logger(EmailService.name);
-  private transporter: nodemailer.Transporter;
-
-  constructor() {
-    this.createTransporter();
-  }
-  //Note: Can be modified to cache access token to reduce redundant calls to Google API
-  private async getAccessToken(): Promise<string> {
-    try {
-      const oAuth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        'https://developers.google.com/oauthplayground', // Redirect URL
-      );
-      oAuth2Client.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
-      });
-      const accessToken = await oAuth2Client.getAccessToken();
-      return accessToken.token || '';
-=======
 
 @Injectable()
 export class EmailService {
@@ -54,30 +29,12 @@ export class EmailService {
       }
 
       return accessToken;
->>>>>>> origin/feature/email-verification
     } catch (error) {
       this.logger.error('Failed to retrieve access token:', error);
       throw new Error('Failed to retrieve access token');
     }
   }
 
-<<<<<<< HEAD
-  private async createTransporter() {
-    const accessToken = await this.getAccessToken();
-
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        type: 'OAuth2',
-        user: process.env.EMAIL_USER,
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-        accessToken: accessToken,
-      },
-    });
-  }
-=======
   private async createTransporter(): Promise<nodemailer.Transporter> {
     try {
       const accessToken = await this.getAccessToken();
@@ -99,46 +56,27 @@ export class EmailService {
     }
   }
 
->>>>>>> origin/feature/email-verification
   async sendVerificationEmail(
     email: string,
     token: string,
     userName: string,
   ): Promise<void> {
     try {
-<<<<<<< HEAD
-      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
-
-=======
       const transporter = await this.createTransporter();
 
       const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${token}`;
->>>>>>> origin/feature/email-verification
       const htmlContent = this.getVerificationEmailTemplate(
         userName,
         verificationUrl,
       );
 
       const mailOptions = {
-<<<<<<< HEAD
-        from: `"Bright Social" <${process.env.EMAIL_USER}>`,
-=======
         from: `"Bright Social" <${this.OAUTH_USER}>`,
->>>>>>> origin/feature/email-verification
         to: email,
         subject: '🎉 Welcome to Bright Social - Verify Your Email',
         html: htmlContent,
       };
 
-<<<<<<< HEAD
-      const result = await this.transporter.sendMail(mailOptions);
-      this.logger.log(
-        `Verification email sent to ${email}. MessageId: ${result.messageId}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `Failed to send verification email to ${email}:`,
-=======
       const result = await transporter.sendMail(mailOptions);
       this.logger.log(
         `✅ Verification email sent to ${email}. MessageId: ${result.messageId}`,
@@ -146,7 +84,6 @@ export class EmailService {
     } catch (error) {
       this.logger.error(
         `❌ Failed to send verification email to ${email}:`,
->>>>>>> origin/feature/email-verification
         error,
       );
       throw new Error('Failed to send verification email');

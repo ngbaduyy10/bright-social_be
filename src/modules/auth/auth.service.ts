@@ -1,4 +1,11 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
@@ -74,10 +81,10 @@ export class AuthService {
   }
 
   async googleLogin(googleData: GoogleLoginDto) {
-    const user = await this.usersService.getUserByEmail(googleData.email);
+    let user = await this.usersService.getUserByEmail(googleData.email);
 
     if (user) {
-      const { password, ...user_filtered } = user;
+      const { password, ...userWithoutPassword } = user;
       const payload = {
         id: user.id,
         email: user.email,
@@ -89,7 +96,7 @@ export class AuthService {
       const token = this.jwtService.sign(payload);
       return {
         access_token: token,
-        user: user_filtered,
+        user: userWithoutPassword,
       };
     } else {
       const newUserData: CreateUserDto = {
@@ -125,11 +132,11 @@ export class AuthService {
 
       const user = await this.usersService.findById(userId);
       if (!user) {
-        throw new BadRequestException('User not found');
+        throw new NotFoundException('User not found');
       }
 
       if (user.is_verified) {
-        throw new BadRequestException('Email is already verified');
+        throw new ConflictException('Email is already verified');
       }
 
       await this.usersService.markEmailAsVerified(userId);
@@ -158,32 +165,33 @@ export class AuthService {
       };
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new BadRequestException('Verification token has expired');
+        throw new UnauthorizedException('Verification token has expired');
       }
       if (error.name === 'JsonWebTokenError') {
-        throw new BadRequestException('Invalid verification token');
+        throw new UnauthorizedException('Invalid verification token');
       }
       if (error.name === 'NotBeforeError') {
-        throw new BadRequestException('Verification token is not yet valid');
+        throw new UnauthorizedException('Verification token is not yet valid');
       }
       if (error.message?.includes('Token is required')) {
         throw new BadRequestException('Verification token is required');
       }
-      if (error.message?.includes('Invalid token type')) {
-        throw new BadRequestException('Invalid verification token type');
+      if (error.message?.includes('Token must be a string')) {
+        throw new BadRequestException('Verification token must be a string');
       }
       if (
-        error.message?.includes('Token missing required fields') ||
-        error.message?.includes('Token contains invalid field types') ||
+        error.message?.includes('Invalid token type') ||
         error.message?.includes('Invalid token structure')
       ) {
         throw new BadRequestException('Invalid verification token format');
       }
-
-      if (error instanceof BadRequestException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
-      console.log('Email verification error:', error);
       throw new BadRequestException('Email verification failed');
     }
   }
@@ -192,11 +200,11 @@ export class AuthService {
     const user = await this.usersService.getUserByEmail(email);
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new NotFoundException('User not found');
     }
 
     if (user.is_verified) {
-      throw new BadRequestException('Email is already verified');
+      throw new ConflictException('Email is already verified');
     }
 
     const verificationToken =

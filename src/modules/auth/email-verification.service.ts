@@ -13,19 +13,11 @@ export class EmailVerificationService {
       timestamp: Date.now(),
     };
 
-    // Token expires in 24 hours
-    return this.jwtService.sign(payload, { expiresIn: '24h' });
+    // Token expires in 1h
+    return this.jwtService.sign(payload, { expiresIn: '1h' });
   }
 
   verifyToken(token: string): { email: string; userId: string } {
-    if (typeof token !== 'string') {
-      throw new Error('Token must be a string');
-    }
-
-    if (!token?.trim()) {
-      throw new Error('Token is required');
-    }
-
     const decoded = this.jwtService.verify(token);
 
     if (!decoded || typeof decoded !== 'object') {
@@ -34,15 +26,6 @@ export class EmailVerificationService {
 
     if (decoded.type !== 'email_verification') {
       throw new Error('Invalid token type');
-    }
-
-    if (
-      !decoded.email ||
-      !decoded.userId ||
-      typeof decoded.email !== 'string' ||
-      typeof decoded.userId !== 'string'
-    ) {
-      throw new Error('Token missing or invalid required fields');
     }
 
     return {
