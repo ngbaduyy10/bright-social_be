@@ -1,23 +1,28 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { databaseConfig } from './config/database';
+import { Repositories } from './repositories/index.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from './modules/user/user.module';
-import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
+import { CacheModule } from '@nestjs/cache-manager';
+import { CacheService } from './config/cache';
 import { redisStore } from 'cache-manager-ioredis-yet';
 import { AuthModule } from './modules/auth/auth.module';
-import { CacheModule } from './modules/cache/cache.module';
 import { JwtStrategy } from './modules/auth/strategies/jwt.strategy';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { FriendModule } from './modules/friend/friend.module';
 
+@Global()
 @Module({
   controllers: [AppController],
   providers: [
+    ...Repositories,
+    CacheService,
     AppService,
     JwtStrategy,
     {
@@ -44,7 +49,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
         signOptions: { expiresIn: '1d' },
       }),
     }),
-    NestCacheModule.registerAsync({
+    CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -55,9 +60,13 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
         ttl: configService.get<number>('CACHE_TTL') || 3600000,
       }),
     }),
-    CacheModule,
     UserModule,
     AuthModule,
+    FriendModule,
+  ],
+  exports: [
+    ...Repositories,
+    CacheService,
   ],
 })
 export class AppModule {}
