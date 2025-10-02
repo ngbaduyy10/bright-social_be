@@ -4,12 +4,14 @@ import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
+import { UserRepository } from '@/repositories/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async register(userData: CreateUserDto) {
@@ -37,7 +39,7 @@ export class AuthService {
   }
 
   async googleLogin(googleData: GoogleLoginDto) {
-    let user = await this.usersService.getUserByEmail(googleData.email);
+    let user = await this.userRepository.getUserByEmail(googleData.email);
     
     if (user) {
       const { password, ...userWithoutPassword } = user;

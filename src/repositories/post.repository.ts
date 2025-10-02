@@ -1,0 +1,46 @@
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { PostEntity } from '@/entities/post.entity';
+
+@Injectable()
+export class PostRepository extends Repository<PostEntity> {
+  constructor(private dataSource: DataSource) {
+    super(PostEntity, dataSource.createEntityManager());
+  }
+
+  async getPostsByFriends(friendIds: string[], page: number = 1, limit: number = 10) {
+    const offset = (page - 1) * limit;
+    
+    return await this
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.images', 'images')
+      .leftJoinAndSelect('post.likes', 'likes')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('post.shares', 'shares')
+      .leftJoinAndSelect('post.saves', 'saves')
+      .where('post.user_id IN (:...friendIds)', { friendIds })
+      .orderBy('post.created_at', 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getMany();
+  }
+
+  async getPostsByUser(userId: string, page: number = 1, limit: number = 10) {
+    const offset = (page - 1) * limit;
+    
+    return await this
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.images', 'images')
+      .leftJoinAndSelect('post.likes', 'likes')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('post.shares', 'shares')
+      .leftJoinAndSelect('post.saves', 'saves')
+      .where('post.user_id = :userId', { userId })
+      .orderBy('post.created_at', 'DESC')
+      .skip(offset)
+      .take(limit)
+      .getMany();
+  }
+}

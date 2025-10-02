@@ -1,28 +1,19 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { UserEntity } from '@/entities/user.entity';
 import { comparePasswords, hashPassword } from '@/utils/helpers';
 import { CacheService } from '@/config/cache';
 import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
+import { UserRepository } from '@/repositories/user.repository';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity) 
-    private readonly userRepository: Repository<UserEntity>,
+    private readonly userRepository: UserRepository,
     private readonly cacheService: CacheService,
   ) {}
 
-  async getUserByEmail(email: string) {
-    return await this.userRepository.findOne({
-      where: { email },
-    });
-  }
-
   async validateUser(email: string, password: string) {
-    const user = await this.getUserByEmail(email);
+    const user = await this.userRepository.getUserByEmail(email);
     if (user && (await comparePasswords(password, user.password))) {
       const { password, ...result } = user;
       return result;
@@ -58,7 +49,7 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const existingUser = await this.getUserByEmail(createUserDto.email);
+    const existingUser = await this.userRepository.getUserByEmail(createUserDto.email);
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
