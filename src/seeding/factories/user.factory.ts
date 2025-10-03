@@ -12,10 +12,15 @@ export default setSeederFactory(UserEntity, async (): Promise<UserEntity> => {
   user.username = faker.internet.username().toLowerCase();
   user.is_verified = true;
   user.image = faker.image.avatar();
-  user.cover_image = faker.image.url();
+  user.cover_image = faker.image.urlPicsumPhotos({ 
+    height: 300,
+    width: 500, 
+    grayscale: false, 
+    blur: 0,
+  });
   user.bio = faker.lorem.sentence();
   user.gender = faker.helpers.arrayElement(Object.values(Gender));
-  user.phone = faker.phone.number();
+  user.phone = faker.phone.number({ style: 'national' });
   user.password = await hashPassword(faker.internet.password());
   return user;
 });

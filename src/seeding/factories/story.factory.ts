@@ -13,7 +13,12 @@ export default setSeederFactory(StoryEntity, async (): Promise<StoryEntity> => {
     story.background_color = faker.color.rgb();
     story.url = null; 
   } else if (story.type === StoryType.IMAGE) {
-    story.url = faker.image.url();
+    story.url = faker.image.urlPicsumPhotos({ 
+      height: 500, 
+      width: 500, 
+      grayscale: false, 
+      blur: 0,
+    });
     story.background_color = null;
   } else if (story.type === StoryType.VIDEO) {
     story.url = faker.internet.url();

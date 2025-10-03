@@ -4,6 +4,11 @@ import { faker } from '@faker-js/faker';
 
 export default setSeederFactory(ImageEntity, async (): Promise<ImageEntity> => {
   const image = new ImageEntity();
-  image.url = faker.image.url();
+  image.url = faker.image.urlPicsumPhotos({ 
+    height: 500, 
+    width: 500, 
+    grayscale: false, 
+    blur: 0,
+  });
   return image;
 });
