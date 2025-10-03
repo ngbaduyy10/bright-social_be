@@ -1,14 +1,13 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Request } from '@nestjs/common';
 import { FriendService } from './friend.service';
-import { Public } from '@/decorators/public.decorator';
+import { JwtUserDto } from '../auth/dto/jwt-user.dto';
 
 @Controller('friend')
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
-  @Get(':userId')
-  @Public()
-  getFriends(@Param('userId') userId: string) {
-    return this.friendService.getFriends(userId);
+  @Get()
+  getFriends(@Request() req: { user: JwtUserDto }) {
+    return this.friendService.getAll(req.user.id);
   }
 }

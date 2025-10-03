@@ -7,7 +7,7 @@ export class FriendService {
     private readonly friendRepository: FriendRepository,
   ) {}
 
-  async getFriends(userId: string) {
+  async getAll(userId: string) {
     return await this.friendRepository.getAll(userId);
   }
 }

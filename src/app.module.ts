@@ -16,6 +16,8 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { FriendModule } from './modules/friend/friend.module';
+import { PostModule } from './modules/post/post.module';
+import { StoryModule } from './modules/story/story.module';
 
 @Global()
 @Module({
@@ -63,6 +65,8 @@ import { FriendModule } from './modules/friend/friend.module';
     UserModule,
     AuthModule,
     FriendModule,
+    PostModule,
+    StoryModule,
   ],
   exports: [
     ...Repositories,
