@@ -8,13 +8,13 @@ export abstract class BaseEntity {
   is_active: boolean;
 
   @Column({ 
-    type: 'timestamp',
+    type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP'
   })
   created_at: Date;
 
   @Column({ 
-    type: 'timestamp',
+    type: 'timestamptz',
     default: () => 'CURRENT_TIMESTAMP'
   })
   updated_at?: Date;

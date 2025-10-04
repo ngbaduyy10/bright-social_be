@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { UserEntity } from './user.entity';
-import { ImageEntity } from './image.entity';
+import { MediaEntity } from './media.entity';
 import { LikeEntity } from './like.entity';
 import { CommentEntity } from './comment.entity';
 import { ShareEntity } from './share.entity';
@@ -19,8 +19,8 @@ export class PostEntity extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @OneToMany(() => ImageEntity, (image) => image.post)
-  images: ImageEntity[];
+  @OneToMany(() => MediaEntity, (media) => media.post)
+  media: MediaEntity[];  
 
   @OneToMany(() => LikeEntity, (like) => like.post) 
   likes: LikeEntity[];

@@ -20,3 +20,8 @@ export enum StoryType {
   IMAGE = 'image',
   VIDEO = 'video',
 }
+
+export enum MediaType {
+  IMAGE = 'image',
+  VIDEO = 'video',
+}

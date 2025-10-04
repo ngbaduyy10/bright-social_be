@@ -14,7 +14,7 @@ export class PostRepository extends Repository<PostEntity> {
     return await this
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
-      .leftJoinAndSelect('post.images', 'images')
+      .leftJoinAndSelect('post.media', 'media')
       .leftJoinAndSelect('post.likes', 'likes')
       .leftJoinAndSelect('post.comments', 'comments')
       .leftJoinAndSelect('post.shares', 'shares')
@@ -32,7 +32,7 @@ export class PostRepository extends Repository<PostEntity> {
     return await this
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
-      .leftJoinAndSelect('post.images', 'images')
+      .leftJoinAndSelect('post.media', 'media')
       .leftJoinAndSelect('post.likes', 'likes')
       .leftJoinAndSelect('post.comments', 'comments')
       .leftJoinAndSelect('post.shares', 'shares')

@@ -1,16 +1,20 @@
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { PostEntity } from './post.entity';
+import { MediaType } from '@/utils/constant';
 
-@Entity('images')
-export class ImageEntity extends BaseEntity {
+@Entity('media')
+export class MediaEntity extends BaseEntity {
   @Column()
   url: string;
 
-  @Column({ nullable: true })
-  type: string;
+  @Column({ type: 'enum', enum: MediaType })
+  type: MediaType;
 
-  @Column({ nullable: true })
+  @Column()
+  order: number;
+
+  @Column()
   post_id: string;
 
   @ManyToOne(() => PostEntity, { onDelete: 'CASCADE' })
