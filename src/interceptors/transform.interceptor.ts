@@ -8,11 +8,14 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+
 export interface Response<T> {
   statusCode: number;
   message?: string;
   data: any;
+  meta?: PaginationMeta;
 }
+
 @Injectable()
 export class TransformInterceptor<T>
   implements NestInterceptor<T, Response<T>> {
@@ -24,12 +27,17 @@ export class TransformInterceptor<T>
     return next
       .handle()
       .pipe(
-        map((data) => ({
-          statusCode: context.switchToHttp().getResponse().statusCode,
-          message: this.reflector
-            .get<string>(RESPONSE_MESSAGE, context.getHandler()) || '',
-          data: data
-        })),
+        map((data) => {
+          const isPaginated = data && typeof data === 'object' && 'meta' in data;
+          
+          return {
+            statusCode: context.switchToHttp().getResponse().statusCode,
+            message: this.reflector
+              .get<string>(RESPONSE_MESSAGE, context.getHandler()) || '',
+            data: isPaginated ? data.data : data,
+            ...(isPaginated && { meta: data.meta })
+          };
+        }),
       );
   }
 }

@@ -11,14 +11,16 @@ export class StoryRepository extends Repository<StoryEntity> {
   async getStoriesByFriends(friendIds: string[], page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
     
-    return await this
+    const [stories, total] = await this
       .createQueryBuilder('story')
       .leftJoinAndSelect('story.user', 'user')
       .where('story.user_id IN (:...friendIds)', { friendIds })
       .orderBy('story.created_at', 'DESC')
       .skip(offset)
       .take(limit)
-      .getMany();
+      .getManyAndCount();
+
+    return { stories, total };
   }
 
   async getStoriesByUser(userId: string, page: number = 1, limit: number = 10) {

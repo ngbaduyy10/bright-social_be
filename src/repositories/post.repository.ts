@@ -11,7 +11,7 @@ export class PostRepository extends Repository<PostEntity> {
   async getPostsByFriends(friendIds: string[], page: number = 1, limit: number = 10) {
     const offset = (page - 1) * limit;
     
-    return await this
+    const [posts, total] = await this
       .createQueryBuilder('post')
       .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.media', 'media')
@@ -23,7 +23,9 @@ export class PostRepository extends Repository<PostEntity> {
       .orderBy('post.created_at', 'DESC')
       .skip(offset)
       .take(limit)
-      .getMany();
+      .getManyAndCount();
+    
+    return { posts, total };
   }
 
   async getPostsByUser(userId: string, page: number = 1, limit: number = 10) {
