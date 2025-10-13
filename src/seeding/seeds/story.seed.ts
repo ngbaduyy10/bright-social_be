@@ -21,7 +21,7 @@ export default class StorySeeder implements Seeder {
     let totalStoriesCreated = 0;
     
     for (const user of users) {
-      const numberOfStories = Math.floor(Math.random() * 3);
+      const numberOfStories = Math.floor(Math.random() * 5) + 1;
       
       if (numberOfStories > 0) {
         for (let i = 0; i < numberOfStories; i++) {

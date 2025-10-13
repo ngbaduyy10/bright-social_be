@@ -10,26 +10,15 @@ export class StoryService {
     private readonly friendService: FriendService,
   ) {}
 
-  async getStoriesByFriends(userId: string, page: number, limit: number): Promise<PaginatedResponse<StoryEntity[]>> {
+  async getStoriesByFriends(userId: string, page: number, limit: number) {
     const friends = await this.friendService.getAll(userId);
     const friendIds = friends.map(friend => friend.friend_id);
+    
     if (friendIds.length === 0) {
-      const meta: PaginationMeta = {
-        page,
-        limit,
-        total: 0,
-        totalPages: 0,
-      };
-      return { data: [], meta };
+      return [];
     }
     
-    const { stories, total } = await this.storyRepository.getStoriesByFriends(friendIds, page, limit);
-    const meta: PaginationMeta = {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    };
-    return { data: stories, meta };
+    const storiesByUser = await this.storyRepository.getLatestFriendsStories(friendIds, page, limit);
+    return storiesByUser;
   }
 }

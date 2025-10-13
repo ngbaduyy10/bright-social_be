@@ -8,7 +8,7 @@ export class PostRepository extends Repository<PostEntity> {
     super(PostEntity, dataSource.createEntityManager());
   }
 
-  async getPostsByFriends(friendIds: string[], page: number = 1, limit: number = 10) {
+  async getPostsByFriends(friendIds: string[], page: number, limit: number) {
     const offset = (page - 1) * limit;
     
     const [posts, total] = await this
@@ -28,7 +28,7 @@ export class PostRepository extends Repository<PostEntity> {
     return { posts, total };
   }
 
-  async getPostsByUser(userId: string, page: number = 1, limit: number = 10) {
+  async getPostsByUser(userId: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
     
     return await this

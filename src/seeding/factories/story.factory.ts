@@ -6,7 +6,7 @@ import { faker } from '@faker-js/faker';
 export default setSeederFactory(StoryEntity, async (): Promise<StoryEntity> => {
   const story = new StoryEntity();
   
-  story.type = faker.helpers.arrayElement(Object.values(StoryType));
+  story.type = faker.helpers.arrayElement([StoryType.IMAGE, StoryType.TEXT]);
   
   if (story.type === StoryType.TEXT) {
     story.content = faker.lorem.sentence();
