@@ -11,6 +11,12 @@ export class MediaEntity extends BaseEntity {
   @Column({ type: 'enum', enum: MediaType })
   type: MediaType;
 
+  @Column({ nullable: true })
+  width: number;
+
+  @Column({ nullable: true })
+  height: number;
+
   @Column()
   order: number;
 
