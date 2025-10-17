@@ -45,4 +45,23 @@ export class PostRepository extends Repository<PostEntity> {
       .take(limit)
       .getMany();
   }
+
+  async getSavedPostsByUser(userId: string, page: number, limit: number, order: 'ASC' | 'DESC' = 'DESC') {
+    const offset = (page - 1) * limit;
+    
+    const [posts, total] = await this
+      .createQueryBuilder('post')
+      .innerJoinAndSelect('post.saves', 'save', 'save.user_id = :userId', { userId })
+      .leftJoinAndSelect('post.user', 'user')
+      .leftJoinAndSelect('post.media', 'media')
+      .leftJoinAndSelect('post.likes', 'likes')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .leftJoinAndSelect('post.shares', 'shares')
+      .orderBy('save.created_at', order)
+      .skip(offset)
+      .take(limit)
+      .getManyAndCount();
+    
+    return { posts, total };
+  }
 }

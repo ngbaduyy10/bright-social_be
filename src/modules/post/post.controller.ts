@@ -15,4 +15,15 @@ export class PostController {
   ): Promise<PaginatedResponse<PostEntity[]>> {
     return await this.postService.getPostsByFriends(req.user.id, page, limit);
   }
+
+  @Get('saved')
+  async getSavedPosts(
+    @Request() req: { user: JwtUserDto }, 
+    @Query('page') page: number, 
+    @Query('limit') limit: number,
+    @Query('order') order?: 'asc' | 'desc'
+  ): Promise<PaginatedResponse<PostEntity[]>> {
+    const sortOrder = order ? order.toUpperCase() as 'ASC' | 'DESC' : 'DESC';
+    return await this.postService.getSavedPosts(req.user.id, page, limit, sortOrder);
+  }
 }

@@ -2,6 +2,8 @@ import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { DataSource } from 'typeorm';
 import { UserEntity } from '@/entities/user.entity';
 import { FriendEntity } from '@/entities/friend.entity';
+import { PostEntity } from '@/entities/post.entity';
+import { SaveEntity } from '@/entities/save.entity';
 import { hashPassword } from '@/utils/helpers';
 import { FriendStatus } from '@/utils/constant';
 
@@ -12,6 +14,8 @@ export default class MainSeeder implements Seeder {
   ): Promise<any> {
     const userRepository = dataSource.getRepository(UserEntity);
     const friendRepository = dataSource.getRepository(FriendEntity);
+    const postRepository = dataSource.getRepository(PostEntity);
+    const saveRepository = dataSource.getRepository(SaveEntity);
 
     const staticUser = userRepository.create({
       email: 'ngbaduyy05@gmail.com',
@@ -54,6 +58,25 @@ export default class MainSeeder implements Seeder {
       await friendRepository.save(friendRelationships);
     } else {
       console.log('ℹ️ No other users found to create friendships with');
+    }
+
+    const allPosts = await postRepository.find({ take:  7});
+
+    if (allPosts.length > 0) {
+      const savedPosts: SaveEntity[] = [];
+      const postsToSave = allPosts.slice(0, Math.min(7, allPosts.length));
+
+      for (const post of postsToSave) {
+        const savePost = saveRepository.create({
+          user_id: staticUser.id,
+          post_id: post.id,
+        });
+        savedPosts.push(savePost);
+      }
+
+      await saveRepository.save(savedPosts);
+    } else {
+      console.log('ℹ️ No posts found to save');
     }
   }
 }
