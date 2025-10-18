@@ -28,8 +28,12 @@ export class PageService {
 
   async getProfilePage(username: string, postLimit: number, storyLimit: number): Promise<UserEntity> {
     const user = await this.userService.findOneByUsername(username);
-    user.posts = await this.postRepository.getPostsByUser(user.id, 1, postLimit);
-    user.stories = await this.storyRepository.getStoriesByUser(user.id, 1, storyLimit);
-    return user;
+    const { posts } = await this.postRepository.getPostsByUser(user.id, 1, postLimit);
+    const { stories } = await this.storyRepository.getStoriesByUser(user.id, 1, storyLimit);
+    return {
+      ...user,
+      posts,
+      stories,
+    };
   }
 }

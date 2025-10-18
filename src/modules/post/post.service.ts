@@ -46,4 +46,15 @@ export class PostService {
     
     return { data: posts, meta };
   }
+
+  async getPostsByUser(userId: string, page: number, limit: number): Promise<PaginatedResponse<PostEntity[]>> {
+    const { posts, total } = await this.postRepository.getPostsByUser(userId, page, limit);
+    const meta: PaginationMeta = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    };
+    return { data: posts, meta };
+  }
 }

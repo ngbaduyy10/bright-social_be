@@ -31,8 +31,9 @@ export class PostRepository extends Repository<PostEntity> {
   async getPostsByUser(userId: string, page: number, limit: number) {
     const offset = (page - 1) * limit;
     
-    return await this
+    const [posts, total] = await this
       .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.media', 'media')
       .leftJoinAndSelect('post.likes', 'likes')
       .leftJoinAndSelect('post.comments', 'comments')
@@ -42,7 +43,9 @@ export class PostRepository extends Repository<PostEntity> {
       .orderBy('post.created_at', 'DESC')
       .skip(offset)
       .take(limit)
-      .getMany();
+      .getManyAndCount();
+    
+    return { posts, total };
   }
 
   async getSavedPostsByUser(userId: string, page: number, limit: number, order: 'ASC' | 'DESC' = 'DESC') {
