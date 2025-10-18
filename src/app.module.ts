@@ -18,6 +18,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { FriendModule } from './modules/friend/friend.module';
 import { PostModule } from './modules/post/post.module';
 import { StoryModule } from './modules/story/story.module';
+import { PageModule } from './modules/page/page.module';
 
 @Global()
 @Module({
@@ -67,6 +68,7 @@ import { StoryModule } from './modules/story/story.module';
     FriendModule,
     PostModule,
     StoryModule,
+    PageModule,
   ],
   exports: [
     ...Repositories,

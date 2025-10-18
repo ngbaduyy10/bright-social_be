@@ -13,7 +13,6 @@ export class StoryRepository extends Repository<StoryEntity> {
     
     return await this
       .createQueryBuilder('story')
-      .leftJoinAndSelect('story.user', 'user')
       .where('story.user_id = :userId', { userId })
       .orderBy('story.created_at', 'DESC')
       .skip(offset)

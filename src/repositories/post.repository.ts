@@ -33,7 +33,6 @@ export class PostRepository extends Repository<PostEntity> {
     
     return await this
       .createQueryBuilder('post')
-      .leftJoinAndSelect('post.user', 'user')
       .leftJoinAndSelect('post.media', 'media')
       .leftJoinAndSelect('post.likes', 'likes')
       .leftJoinAndSelect('post.comments', 'comments')

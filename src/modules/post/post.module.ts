@@ -6,6 +6,7 @@ import { FriendModule } from '../friend/friend.module';
 @Module({
   controllers: [PostController],
   providers: [PostService],
-  imports: [FriendModule]  
+  imports: [FriendModule],
+  exports: [PostService]
 })
 export class PostModule {}

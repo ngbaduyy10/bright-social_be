@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { StoryRepository } from '@/repositories/story.repository';
 import { FriendService } from '../friend/friend.service';
-import { StoryEntity } from '@/entities/story.entity';
+import { UserStoryDto } from './dto/userStory.dto';
 
 @Injectable()
 export class StoryService {
@@ -10,7 +10,7 @@ export class StoryService {
     private readonly friendService: FriendService,
   ) {}
 
-  async getStoriesByFriends(userId: string, page: number, limit: number) {
+  async getStoriesByFriends(userId: string, page: number, limit: number): Promise<UserStoryDto[]> {
     const friends = await this.friendService.getAll(userId);
     const friendIds = friends.map(friend => friend.friend_id);
     
@@ -18,7 +18,6 @@ export class StoryService {
       return [];
     }
     
-    const storiesByUser = await this.storyRepository.getLatestFriendsStories(friendIds, page, limit);
-    return storiesByUser;
+    return await this.storyRepository.getLatestFriendsStories(friendIds, page, limit);
   }
 }

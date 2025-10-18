@@ -4,6 +4,7 @@ import { comparePasswords, hashPassword } from '@/utils/helpers';
 import { CacheService } from '@/config/cache';
 import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
 import { UserRepository } from '@/repositories/user.repository';
+import { UserEntity } from '@/entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -89,13 +90,13 @@ export class UserService {
     return this.userRepository.find();
   }
 
-  async findOne(id: string) {
-    const user = await this.cacheService.execute(
+  async findOneByUsername(username: string): Promise<UserEntity> {
+    const user = await this.cacheService.execute<UserEntity>(
       PREFIX_USER_CACHE,
-      id,
+      username,
       async () => {
         return await this.userRepository.findOne({
-          where: { id },
+          where: { username },
         });
       }
     );

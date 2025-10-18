@@ -6,6 +6,7 @@ import { FriendModule } from '../friend/friend.module';
 @Module({
   controllers: [StoryController],
   providers: [StoryService],
-  imports: [FriendModule]
+  imports: [FriendModule],
+  exports: [StoryService]
 })
 export class StoryModule {}
