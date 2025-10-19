@@ -19,6 +19,7 @@ import { FriendModule } from './modules/friend/friend.module';
 import { PostModule } from './modules/post/post.module';
 import { StoryModule } from './modules/story/story.module';
 import { PageModule } from './modules/page/page.module';
+import { MediaModule } from './modules/media/media.module';
 
 @Global()
 @Module({
@@ -69,6 +70,7 @@ import { PageModule } from './modules/page/page.module';
     PostModule,
     StoryModule,
     PageModule,
+    MediaModule,
   ],
   exports: [
     ...Repositories,

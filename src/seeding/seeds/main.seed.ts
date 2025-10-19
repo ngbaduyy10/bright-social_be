@@ -56,6 +56,7 @@ export default class MainSeeder implements Seeder {
     for (const post of posts) {
       for (let i = 0; i < 2; i++) {
         const media = await mediaFactory.make();
+        media.user_id = staticUser.id;
         media.post_id = post.id;
         media.order = i;
         allMedia.push(media);

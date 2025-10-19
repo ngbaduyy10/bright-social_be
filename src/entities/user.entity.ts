@@ -3,6 +3,7 @@ import { Gender } from '@/utils/constant';
 import { BaseEntity } from './base.entity';
 import { PostEntity } from './post.entity';
 import { StoryEntity } from './story.entity';
+import { MediaEntity } from './media.entity';
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
@@ -44,4 +45,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => StoryEntity, (story) => story.user)
   stories: StoryEntity[];
+
+  @OneToMany(() => MediaEntity, (media) => media.user)
+  media: MediaEntity[];
 }

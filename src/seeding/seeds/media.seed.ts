@@ -27,6 +27,7 @@ export default class MediaSeeder implements Seeder {
       
       for (let i = 0; i < mediaCount; i++) {
         const media = await mediaFactory.make();
+        media.user_id = post.user_id;
         media.post_id = post.id;
         media.order = i + 1;
         allMedia.push(media);

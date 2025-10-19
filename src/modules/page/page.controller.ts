@@ -22,7 +22,8 @@ export class PageController {
     @Param('username') username: string,
     @Query('post-limit') postLimit: number,
     @Query('story-limit') storyLimit: number,
+    @Query('media-limit') mediaLimit: number,
   ) {
-    return this.pageService.getProfilePage(username, postLimit, storyLimit);
+    return this.pageService.getProfilePage(username, postLimit, storyLimit, mediaLimit);
   }
 }
