@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { PostRepository } from '@/repositories/post.repository';
-import { FriendService } from '../friend/friend.service';
 import { PostEntity } from '@/entities/post.entity';
+import { FriendRepository } from '@/repositories/friend.repository';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
-    private readonly friendService: FriendService,
+    private readonly friendRepository: FriendRepository,
   ) {}
 
   async getPostsByFriends(userId: string, page: number, limit: number): Promise<PaginatedResponse<PostEntity[]>> {
-    const friends = await this.friendService.getAll(userId);
+    const friends = await this.friendRepository.getAll(userId);
     const friendIds = friends.map(friend => friend.friend_id);
     
     if (friendIds.length === 0) {

@@ -12,15 +12,53 @@ export class FriendRepository extends Repository<FriendEntity> {
   async getAll(userId: string) {
     const friends = await this
       .createQueryBuilder('friend')
-      .leftJoinAndSelect('friend.friend', 'friendUser')
       .where('friend.status = :status', { status: FriendStatus.ACCEPTED })
       .andWhere('(friend.user_id = :userId)', { userId })
       .getMany();
 
-    friends.forEach(friend => {
-      delete friend.friend.password;
-    });
-
     return friends;
   }
+
+  async getPaginatedFriends(userId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const [friends, total] = await this
+      .createQueryBuilder('friend')
+      .leftJoinAndSelect('friend.friend', 'friendUser')
+      .where('friend.status = :status', { status: FriendStatus.ACCEPTED })
+      .andWhere('(friend.user_id = :userId)', { userId })
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { friends, total };
+  }
+
+  async getFriendRequests(userId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const [friendRequests, total] = await this
+      .createQueryBuilder('friend')
+      .leftJoinAndSelect('friend.user', 'users')
+      .where('friend.status = :status', { status: FriendStatus.PENDING })
+      .andWhere('(friend.friend_id = :userId)', { userId })
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { friendRequests, total };
+  }
+
+  async getSentRequests(userId: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const [sentRequests, total] = await this
+      .createQueryBuilder('friend')
+      .leftJoinAndSelect('friend.friend', 'friendUser')
+      .where('friend.status = :status', { status: FriendStatus.PENDING })
+      .andWhere('(friend.user_id = :userId)', { userId })
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+      
+    return { sentRequests, total };
+  }
+
 }

@@ -8,8 +8,8 @@ export default class UserSeeder implements Seeder {
     factoryManager: SeederFactoryManager
   ): Promise<any> {
     const userFactory = factoryManager.get(UserEntity);
-    await userFactory.saveMany(20);
+    await userFactory.saveMany(50);
     
-    console.log('✅ 20 users created successfully!');
+    console.log('✅ 50 users created successfully!');
   }
 }

@@ -83,7 +83,13 @@ export default class MainSeeder implements Seeder {
     if (otherUsers.length > 0) {
       const friendRelationships: FriendEntity[] = [];
 
-      for (const otherUser of otherUsers) {
+      // Split users into groups
+      const acceptedFriends = otherUsers.slice(0, 30);
+      const friendRequests = otherUsers.slice(30, 40);
+      const sentRequests = otherUsers.slice(40, 45); 
+
+      // Create 30 accepted friendships (bidirectional)
+      for (const otherUser of acceptedFriends) {
         const friendship1 = friendRepository.create({
           user_id: staticUser.id,
           friend_id: otherUser.id,
@@ -97,6 +103,26 @@ export default class MainSeeder implements Seeder {
           status: FriendStatus.ACCEPTED,
         });
         friendRelationships.push(friendship2);
+      }
+
+      // Create 10 incoming friend requests (others send to staticUser)
+      for (const otherUser of friendRequests) {
+        const incomingRequest = friendRepository.create({
+          user_id: otherUser.id,
+          friend_id: staticUser.id,
+          status: FriendStatus.PENDING,
+        });
+        friendRelationships.push(incomingRequest);
+      }
+
+      // Create 5 outgoing sent requests (staticUser sends to others)
+      for (const otherUser of sentRequests) {
+        const sentRequest = friendRepository.create({
+          user_id: staticUser.id,
+          friend_id: otherUser.id,
+          status: FriendStatus.PENDING,
+        });
+        friendRelationships.push(sentRequest);
       }
 
       await friendRepository.save(friendRelationships);

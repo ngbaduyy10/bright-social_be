@@ -21,7 +21,7 @@ export default class FriendSeeder implements Seeder {
     const existingRelationships = new Set<string>();
 
     for (const user of users) {
-      const numberOfFriends = faker.number.int({ min: 5, max: 10 });
+      const numberOfFriends = faker.number.int({ min: 10, max: 20 });
       const availableUsers = users.filter(u => u.id !== user.id);
       
       const shuffledUsers = faker.helpers.shuffle([...availableUsers]);
