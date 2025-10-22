@@ -1,11 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
+import { Filter } from '@/utils/constant';
 import { PostEntity } from '@/entities/post.entity';
 
 @Injectable()
 export class PostRepository extends Repository<PostEntity> {
   constructor(private dataSource: DataSource) {
     super(PostEntity, dataSource.createEntityManager());
+  }
+
+  async getAllPosts(filter: Filter) {
+    const offset = (filter.page - 1) * filter.limit;
+    const query = this
+    .createQueryBuilder('post')
+    .leftJoinAndSelect('post.user', 'user')
+    .leftJoinAndSelect('post.media', 'media')
+    .leftJoinAndSelect('post.likes', 'likes')
+    .leftJoinAndSelect('post.comments', 'comments')
+    .leftJoinAndSelect('post.shares', 'shares')
+
+    if (filter.keyword) {
+      query.where(`
+        LOWER(post.content) LIKE :keyword
+      `, { keyword: `%${filter.keyword.toLowerCase()}%` });
+    }
+
+    query.skip(offset).take(filter.limit);
+
+    const [posts, total] = await query.getManyAndCount();
+    return { posts, total };
   }
 
   async getPostsByFriends(friendIds: string[], page: number, limit: number) {

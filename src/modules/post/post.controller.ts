@@ -8,6 +8,15 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
+  async findAll(
+    @Query('keyword') keyword: string,
+    @Query('limit') limit: number,
+    @Query('page') page: number
+  ): Promise<PaginatedResponse<PostEntity[]>> {
+    return await this.postService.findAll({ keyword, limit, page });
+  }
+
+  @Get('friend')
   async getPostsByFriends(
     @Request() req: { user: JwtUserDto }, 
     @Query('page') page: number, 

@@ -5,6 +5,7 @@ import { CacheService } from '@/config/cache';
 import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
 import { UserRepository } from '@/repositories/user.repository';
 import { UserEntity } from '@/entities/user.entity';
+import { Filter } from '@/utils/constant';
 
 @Injectable()
 export class UserService {
@@ -86,10 +87,6 @@ export class UserService {
     return result;
   }
 
-  findAll() {
-    return this.userRepository.find();
-  }
-
   async findOneByUsername(username: string): Promise<UserEntity> {
     const user = await this.cacheService.execute<UserEntity>(
       PREFIX_USER_CACHE,
@@ -101,5 +98,17 @@ export class UserService {
       }
     );
     return user;
+  }
+
+  async findAll(filter: Filter): Promise<PaginatedResponse<UserEntity[]>> {
+    const { users, total } = await this.userRepository.getAllUsers(filter);
+    const meta: PaginationMeta = {
+      page: filter.page,
+      limit: filter.limit,
+      total,
+      totalPages: Math.ceil(total / filter.limit),
+    };
+    
+    return { data: users, meta };
   }
 }

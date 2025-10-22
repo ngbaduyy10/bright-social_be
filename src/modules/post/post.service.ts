@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PostRepository } from '@/repositories/post.repository';
 import { PostEntity } from '@/entities/post.entity';
 import { FriendRepository } from '@/repositories/friend.repository';
+import { Filter } from '@/utils/constant';
 
 @Injectable()
 export class PostService {
@@ -9,6 +10,18 @@ export class PostService {
     private readonly postRepository: PostRepository,
     private readonly friendRepository: FriendRepository,
   ) {}
+
+  async findAll(filter: Filter): Promise<PaginatedResponse<PostEntity[]>> {
+    const { posts, total } = await this.postRepository.getAllPosts(filter);
+    const meta: PaginationMeta = {
+      page: filter.page,
+      limit: filter.limit,
+      total,
+      totalPages: Math.ceil(total / filter.limit),
+    };
+    
+    return { data: posts, meta };
+  }
 
   async getPostsByFriends(userId: string, page: number, limit: number): Promise<PaginatedResponse<PostEntity[]>> {
     const friends = await this.friendRepository.getAll(userId);

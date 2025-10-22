@@ -26,4 +26,13 @@ export class PageController {
   ) {
     return this.pageService.getProfilePage(username, postLimit, storyLimit, mediaLimit);
   }
+
+  @Get('search')
+  async getSearchPage(
+    @Query('keyword') keyword: string,
+    @Query('user-limit') userLimit: number,
+    @Query('post-limit') postLimit: number,
+  ) {
+    return this.pageService.getSearchPage(keyword, userLimit, postLimit);
+  }
 }

@@ -25,3 +25,9 @@ export enum MediaType {
   IMAGE = 'image',
   VIDEO = 'video',
 }
+
+export interface Filter {
+  keyword?: string;
+  limit: number;
+  page: number;
+}

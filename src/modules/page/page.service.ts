@@ -3,10 +3,12 @@ import { PostService } from '../post/post.service';
 import { StoryService } from '../story/story.service';
 import { UserService } from '../user/user.service';
 import { ResponseNewsFeedPageDto } from './dto/responseNewsFeedPage.dto';
+import { ResponseSearchPageDto } from './dto/responseSearchPage.dto';
 import { PostRepository } from '@/repositories/post.repository';
 import { StoryRepository } from '@/repositories/story.repository';
 import { UserEntity } from '@/entities/user.entity';
 import { MediaRepository } from '@/repositories/media.repository';
+import { UserRepository } from '@/repositories/user.repository';
 
 @Injectable()
 export class PageService {
@@ -17,6 +19,7 @@ export class PageService {
     private readonly postRepository: PostRepository,
     private readonly storyRepository: StoryRepository,
     private readonly mediaRepository: MediaRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   async getNewsFeedPage(userId: string, storyLimit: number, postLimit: number): Promise<ResponseNewsFeedPageDto> {
@@ -39,6 +42,15 @@ export class PageService {
       posts,
       stories,
       media,
+    };
+  }
+
+  async getSearchPage(keyword: string, userLimit: number, postLimit: number): Promise<ResponseSearchPageDto> {
+    const { users } = await this.userRepository.getAllUsers({ keyword, limit: userLimit, page: 1 });
+    const { posts } = await this.postRepository.getAllPosts({ keyword, limit: postLimit, page: 1 });
+    return {
+      users,
+      posts,
     };
   }
 }

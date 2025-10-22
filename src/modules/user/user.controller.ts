@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
@@ -14,7 +14,11 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(
+    @Query('keyword') keyword: string,
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+  ) {
+    return this.userService.findAll({ keyword, limit, page });
   }
 }
