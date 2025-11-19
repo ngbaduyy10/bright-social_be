@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostRepository } from '@/repositories/post.repository';
 import { PostEntity } from '@/entities/post.entity';
 import { FriendRepository } from '@/repositories/friend.repository';
@@ -21,6 +21,14 @@ export class PostService {
     };
     
     return { data: posts, meta };
+  }
+
+  async getPostById(id: string): Promise<PostEntity> {
+    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'media', 'likes', 'comments', 'shares'] });
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+    return post;
   }
 
   async getPostsByFriends(userId: string, page: number, limit: number): Promise<PaginatedResponse<PostEntity[]>> {

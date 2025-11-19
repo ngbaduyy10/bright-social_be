@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Public } from '@/decorators/public.decorator';
 
 @Controller('user')
 export class UserController {
@@ -14,6 +15,7 @@ export class UserController {
   }
 
   @Get()
+  @Public()
   findAll(
     @Query('keyword') keyword: string,
     @Query('limit') limit: number,
