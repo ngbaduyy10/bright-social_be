@@ -1,8 +1,6 @@
 import { Controller, Get, Query, Request } from '@nestjs/common';
 import { StoryService } from './story.service';
 import { JwtUserDto } from '../auth/dto/jwt-user.dto';
-import { StoryEntity } from '@/entities/story.entity';
-import { ResponseMessage } from '@/decorators/responseMessage.decorator';
 
 @Controller('story')
 export class StoryController {

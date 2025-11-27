@@ -6,8 +6,11 @@ import { PostEntity } from '@/entities/post.entity';
 import { SaveEntity } from '@/entities/save.entity';
 import { StoryEntity } from '@/entities/story.entity';
 import { MediaEntity } from '@/entities/media.entity';
+import { LikeEntity } from '@/entities/like.entity';
+import { CommentEntity } from '@/entities/comment.entity';
+import { NotificationEntity } from '@/entities/notification.entity';
 import { hashPassword } from '@/utils/helpers';
-import { FriendStatus } from '@/utils/constant';
+import { FriendStatus, NotificationType } from '@/utils/constant';
 
 export default class MainSeeder implements Seeder {
   public async run(
@@ -20,6 +23,9 @@ export default class MainSeeder implements Seeder {
     const saveRepository = dataSource.getRepository(SaveEntity);
     const storyRepository = dataSource.getRepository(StoryEntity);
     const mediaRepository = dataSource.getRepository(MediaEntity);
+    const likeRepository = dataSource.getRepository(LikeEntity);
+    const commentRepository = dataSource.getRepository(CommentEntity);
+    const notificationRepository = dataSource.getRepository(NotificationEntity);
 
     const staticUser = userRepository.create({
       email: 'ngbaduyy05@gmail.com',
@@ -48,6 +54,63 @@ export default class MainSeeder implements Seeder {
     }
 
     await postRepository.save(posts);
+
+    // Get all users to use as actors for likes, comments, and notifications
+    const allUsersForActions = await userRepository.find();
+    const otherUsersForActions = allUsersForActions.filter(user => user.id !== staticUser.id);
+
+    // Create likes, comments, and notifications for each post
+    if (otherUsersForActions.length > 0) {
+      const likeFactory = factoryManager.get(LikeEntity);
+      const commentFactory = factoryManager.get(CommentEntity);
+      const allLikes: LikeEntity[] = [];
+      const allComments: CommentEntity[] = [];
+      const allNotifications: NotificationEntity[] = [];
+
+      for (const post of posts) {
+        // Create 10-12 likes for each post
+        const numLikes = Math.floor(Math.random() * 3) + 10; // Random between 10-12
+        for (let i = 0; i < numLikes; i++) {
+          const like = await likeFactory.make();
+          const randomActor = otherUsersForActions[Math.floor(Math.random() * otherUsersForActions.length)];
+          like.post_id = post.id;
+          like.user_id = randomActor.id;
+          allLikes.push(like);
+
+          // Create notification for like
+          const likeNotification = notificationRepository.create({
+            type: NotificationType.LIKE,
+            user_id: staticUser.id, // Post owner receives notification
+            actor_id: randomActor.id, // User who liked
+          });
+          allNotifications.push(likeNotification);
+        }
+
+        // Create 1-3 comments for each post
+        const numComments = Math.floor(Math.random() * 3) + 1; // Random between 1-3
+        for (let i = 0; i < numComments; i++) {
+          const comment = await commentFactory.make();
+          const randomActor = otherUsersForActions[Math.floor(Math.random() * otherUsersForActions.length)];
+          comment.post_id = post.id;
+          comment.user_id = randomActor.id;
+          allComments.push(comment);
+
+          // Create notification for comment
+          const commentNotification = notificationRepository.create({
+            type: NotificationType.COMMENT,
+            user_id: staticUser.id, // Post owner receives notification
+            actor_id: randomActor.id, // User who commented
+          });
+          allNotifications.push(commentNotification);
+        }
+      }
+
+      await likeRepository.save(allLikes);
+      await commentRepository.save(allComments);
+      await notificationRepository.save(allNotifications);
+    } else {
+      console.log('ℹ️ No other users found to create likes, comments, and notifications');
+    }
 
     // Create 2 media items for each post using factory
     const mediaFactory = factoryManager.get(MediaEntity);

@@ -12,6 +12,8 @@ import FriendSeeder from './seeds/friend.seed';
 import FriendFactory from './factories/friend.factory';
 import MediaSeeder from './seeds/media.seed';
 import MediaFactory from './factories/media.factory';
+import LikeFactory from './factories/like.factory';
+import CommentFactory from './factories/comment.factory';
 import MainSeeder from './seeds/main.seed';
 
 (async () => {
@@ -20,7 +22,7 @@ import MainSeeder from './seeds/main.seed';
         dropSchema: true,
         synchronize: true,
         seeds: [UserSeeder, PostSeeder, MediaSeeder, StorySeeder, FriendSeeder, MainSeeder],
-        factories: [UserFactory, PostFactory, MediaFactory, StoryFactory, FriendFactory]
+        factories: [UserFactory, PostFactory, MediaFactory, StoryFactory, FriendFactory, LikeFactory, CommentFactory]
     };
 
     const dataSource = new DataSource(options);

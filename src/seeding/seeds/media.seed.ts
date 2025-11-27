@@ -29,7 +29,7 @@ export default class MediaSeeder implements Seeder {
         const media = await mediaFactory.make();
         media.user_id = post.user_id;
         media.post_id = post.id;
-        media.order = i + 1;
+        media.order = i;
         allMedia.push(media);
       }
     }
