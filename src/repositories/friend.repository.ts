@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { FriendEntity } from '@/entities/friend.entity';
-import { FriendStatus } from '@/utils/constant';
+import { FriendStatus, ConnectionType } from '@/utils/constant';
 
 @Injectable()
 export class FriendRepository extends Repository<FriendEntity> {
@@ -143,4 +143,48 @@ export class FriendRepository extends Repository<FriendEntity> {
     return [...new Set(allRelatedUserIds)];
   }
 
+  async getTotalFriendsCount(userId: string): Promise<number> {
+    return await this
+      .createQueryBuilder('friend')
+      .where('friend.user_id = :userId', { userId })
+      .andWhere('friend.status = :status', { status: FriendStatus.ACCEPTED })
+      .getCount();
+  }
+
+  async getConnectionType(currentUserId: string, profileUserId: string): Promise<ConnectionType | null> {
+    const friendship = await this
+      .createQueryBuilder('friend')
+      .where('friend.user_id = :currentUserId', { currentUserId })
+      .andWhere('friend.friend_id = :profileUserId', { profileUserId })
+      .andWhere('friend.status = :status', { status: FriendStatus.ACCEPTED })
+      .getOne();
+    
+    if (friendship) {
+      return ConnectionType.FRIEND;
+    }
+
+    const sentRequest = await this
+      .createQueryBuilder('friend')
+      .where('friend.user_id = :currentUserId', { currentUserId })
+      .andWhere('friend.friend_id = :profileUserId', { profileUserId })
+      .andWhere('friend.status = :status', { status: FriendStatus.PENDING })
+      .getOne();
+    
+    if (sentRequest) {
+      return ConnectionType.SENT;
+    }
+
+    const receivedRequest = await this
+      .createQueryBuilder('friend')
+      .where('friend.user_id = :profileUserId', { profileUserId })
+      .andWhere('friend.friend_id = :currentUserId', { currentUserId })
+      .andWhere('friend.status = :status', { status: FriendStatus.PENDING })
+      .getOne();
+    
+    if (receivedRequest) {
+      return ConnectionType.REQUEST;
+    }
+
+    return null;
+  }
 }

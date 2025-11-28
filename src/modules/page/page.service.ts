@@ -6,9 +6,11 @@ import { ResponseNewsFeedPageDto } from './dto/responseNewsFeedPage.dto';
 import { ResponseSearchPageDto } from './dto/responseSearchPage.dto';
 import { PostRepository } from '@/repositories/post.repository';
 import { StoryRepository } from '@/repositories/story.repository';
-import { UserEntity } from '@/entities/user.entity';
 import { MediaRepository } from '@/repositories/media.repository';
 import { UserRepository } from '@/repositories/user.repository';
+import { FriendRepository } from '@/repositories/friend.repository';
+import { ResponseProfilePageDto } from './dto/responseProfilePage.dto';
+import { ConnectionType } from '@/utils/constant';
 
 @Injectable()
 export class PageService {
@@ -20,6 +22,7 @@ export class PageService {
     private readonly storyRepository: StoryRepository,
     private readonly mediaRepository: MediaRepository,
     private readonly userRepository: UserRepository,
+    private readonly friendRepository: FriendRepository,
   ) {}
 
   async getNewsFeedPage(userId: string, storyLimit: number, postLimit: number): Promise<ResponseNewsFeedPageDto> {
@@ -31,17 +34,29 @@ export class PageService {
     };
   }
 
-  async getProfilePage(username: string, postLimit: number, storyLimit: number, mediaLimit: number): Promise<UserEntity> {
+  async getProfilePage(currentUserId: string, username: string, postLimit: number, storyLimit: number, mediaLimit: number): Promise<ResponseProfilePageDto> {
     const user = await this.userService.findOneByUsername(username);
     const { posts } = await this.postRepository.getPostsByUser(user.id, 1, postLimit);
     const { stories } = await this.storyRepository.getStoriesByUser(user.id, 1, storyLimit);
     const { media } = await this.mediaRepository.getMediaByUser(user.id, 1, mediaLimit);
+    
+    const totalFriends = await this.friendRepository.getTotalFriendsCount(user.id);
+    
+    let mutual: number | undefined;
+    let connectionType: ConnectionType | null = null;
+    if (currentUserId !== user.id) {
+      mutual = await this.friendRepository.getMutualFriendsCount(currentUserId, user.id);
+      connectionType = await this.friendRepository.getConnectionType(currentUserId, user.id);
+    }
     
     return {
       ...user,
       posts,
       stories,
       media,
+      total_friends: totalFriends,
+      ...(mutual !== undefined && { mutual }),
+      ...(connectionType !== null && { connection_type: connectionType }),
     };
   }
 

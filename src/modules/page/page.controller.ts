@@ -19,12 +19,13 @@ export class PageController {
 
   @Get('profile/:username')
   async getProfilePage(
+    @Request() req: { user: JwtUserDto },
     @Param('username') username: string,
     @Query('post-limit') postLimit: number,
     @Query('story-limit') storyLimit: number,
     @Query('media-limit') mediaLimit: number,
   ) {
-    return this.pageService.getProfilePage(username, postLimit, storyLimit, mediaLimit);
+    return this.pageService.getProfilePage(req.user.id, username, postLimit, storyLimit, mediaLimit);
   }
 
   @Get('search')
