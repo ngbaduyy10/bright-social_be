@@ -11,7 +11,7 @@ export default setSeederFactory(MediaEntity, async (): Promise<MediaEntity> => {
   if (mediaType === MediaType.IMAGE) {
     media.url = faker.image.urlPicsumPhotos({ 
       height: 500, 
-      width: 500, 
+      width: 700, 
       grayscale: false, 
       blur: 0,
     });

@@ -32,4 +32,13 @@ export class FriendController {
   ) {
     return this.friendService.getSentRequests(req.user.id, page, limit);
   }
+
+  @Get('suggested')
+  getSuggestedFriends(
+    @Request() req: { user: JwtUserDto },
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return this.friendService.getSuggestedFriends(req.user.id, page, limit);
+  }
 }
