@@ -33,4 +33,6 @@ export class PostEntity extends BaseEntity {
 
   @OneToMany(() => SaveEntity, (save) => save.post)
   saves: SaveEntity[];
+
+  is_saved?: boolean;
 }

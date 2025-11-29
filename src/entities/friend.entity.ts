@@ -25,4 +25,6 @@ export class FriendEntity extends BaseEntity {
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'friend_id' })
   friend: UserEntity;
+
+  mutual?: number;
 }

@@ -2,20 +2,19 @@ import { Controller, Get, Param, Query, Request } from '@nestjs/common';
 import { PostService } from './post.service';
 import { JwtUserDto } from '../auth/dto/jwt-user.dto';
 import { PostEntity } from '@/entities/post.entity';
-import { Public } from '@/decorators/public.decorator';
 
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   @Get()
-  @Public()
   async findAll(
     @Query('keyword') keyword: string,
     @Query('limit') limit: number,
-    @Query('page') page: number
+    @Query('page') page: number,
+    @Request() req: { user: JwtUserDto }
   ): Promise<PaginatedResponse<PostEntity[]>> {
-    return await this.postService.findAll({ keyword, limit, page });
+    return await this.postService.findAll({ keyword, limit, page }, req.user.id);
   }
 
   @Get('friend')
@@ -42,13 +41,17 @@ export class PostController {
   async getPostsByUser(
     @Param('userId') userId: string,
     @Query('page') page: number,
-    @Query('limit') limit: number
+    @Query('limit') limit: number,
+    @Request() req: { user: JwtUserDto }
   ): Promise<PaginatedResponse<PostEntity[]>> {
-    return await this.postService.getPostsByUser(userId, page, limit);
+    return await this.postService.getPostsByUser(userId, page, limit, req.user.id);
   }
 
   @Get(':id')
-  async getPostById(@Param('id') id: string): Promise<PostEntity> {
-    return await this.postService.getPostById(id);
+  async getPostById(
+    @Param('id') id: string,
+    @Request() req: { user: JwtUserDto }
+  ): Promise<PostEntity> {
+    return await this.postService.getPostById(id, req.user.id);
   }
 }

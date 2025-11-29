@@ -3,6 +3,7 @@ import { PostRepository } from "./post.repository";
 import { StoryRepository } from "./story.repository";
 import { UserRepository } from "./user.repository";
 import { MediaRepository } from "./media.repository";
+import { SaveRepository } from "./save.repository";
 
 export const Repositories = [
   UserRepository,
@@ -10,4 +11,5 @@ export const Repositories = [
   PostRepository,
   StoryRepository,
   MediaRepository,
+  SaveRepository,
 ];

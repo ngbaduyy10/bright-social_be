@@ -11,8 +11,8 @@ export class PostService {
     private readonly friendRepository: FriendRepository,
   ) {}
 
-  async findAll(filter: Filter): Promise<PaginatedResponse<PostEntity[]>> {
-    const { posts, total } = await this.postRepository.getAllPosts(filter);
+  async findAll(filter: Filter, userId: string): Promise<PaginatedResponse<PostEntity[]>> {
+    const { posts, total } = await this.postRepository.getAllPosts(filter, userId);
     const meta: PaginationMeta = {
       page: filter.page,
       limit: filter.limit,
@@ -23,11 +23,18 @@ export class PostService {
     return { data: posts, meta };
   }
 
-  async getPostById(id: string): Promise<PostEntity> {
-    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'media', 'likes', 'comments', 'shares'] });
+  async getPostById(id: string, userId: string): Promise<PostEntity> {
+    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'media', 'likes', 'comments', 'shares', 'saves'] });
     if (!post) {
       throw new NotFoundException('Post not found');
     }
+    
+    if (userId && post.saves) {
+      post.is_saved = post.saves.some(save => save.user_id === userId);
+    } else {
+      post.is_saved = false;
+    }
+    
     return post;
   }
 
@@ -45,7 +52,7 @@ export class PostService {
       return { data: [], meta };
     }
     
-    const { posts, total } = await this.postRepository.getPostsByFriends(friendIds, page, limit);
+    const { posts, total } = await this.postRepository.getPostsByFriends(friendIds, page, limit, userId);
     const meta: PaginationMeta = {
       page,
       limit,
@@ -58,6 +65,7 @@ export class PostService {
 
   async getSavedPosts(userId: string, page: number, limit: number, order?: 'ASC' | 'DESC'): Promise<PaginatedResponse<PostEntity[]>> {
     const { posts, total } = await this.postRepository.getSavedPostsByUser(userId, page, limit, order);
+    
     const meta: PaginationMeta = {
       page,
       limit,
@@ -68,8 +76,8 @@ export class PostService {
     return { data: posts, meta };
   }
 
-  async getPostsByUser(userId: string, page: number, limit: number): Promise<PaginatedResponse<PostEntity[]>> {
-    const { posts, total } = await this.postRepository.getPostsByUser(userId, page, limit);
+  async getPostsByUser(userId: string, page: number, limit: number, currentUserId: string): Promise<PaginatedResponse<PostEntity[]>> {
+    const { posts, total } = await this.postRepository.getPostsByUser(userId, page, limit, currentUserId);
     const meta: PaginationMeta = {
       page,
       limit,

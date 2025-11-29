@@ -33,7 +33,8 @@ export class PageController {
     @Query('keyword') keyword: string,
     @Query('user-limit') userLimit: number,
     @Query('post-limit') postLimit: number,
+    @Request() req: { user: JwtUserDto }
   ) {
-    return this.pageService.getSearchPage(keyword, userLimit, postLimit);
+    return this.pageService.getSearchPage(keyword, userLimit, postLimit, req.user.id);
   }
 }

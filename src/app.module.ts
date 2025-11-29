@@ -20,6 +20,7 @@ import { PostModule } from './modules/post/post.module';
 import { StoryModule } from './modules/story/story.module';
 import { PageModule } from './modules/page/page.module';
 import { MediaModule } from './modules/media/media.module';
+import { SaveModule } from './modules/save/save.module';
 
 @Global()
 @Module({
@@ -71,6 +72,7 @@ import { MediaModule } from './modules/media/media.module';
     StoryModule,
     PageModule,
     MediaModule,
+    SaveModule,
   ],
   exports: [
     ...Repositories,

@@ -36,7 +36,7 @@ export class PageService {
 
   async getProfilePage(currentUserId: string, username: string, postLimit: number, storyLimit: number, mediaLimit: number): Promise<ResponseProfilePageDto> {
     const user = await this.userService.findOneByUsername(username);
-    const { posts } = await this.postRepository.getPostsByUser(user.id, 1, postLimit);
+    const { posts } = await this.postRepository.getPostsByUser(user.id, 1, postLimit, currentUserId);
     const { stories } = await this.storyRepository.getStoriesByUser(user.id, 1, storyLimit);
     const { media } = await this.mediaRepository.getMediaByUser(user.id, 1, mediaLimit);
     
@@ -60,9 +60,9 @@ export class PageService {
     };
   }
 
-  async getSearchPage(keyword: string, userLimit: number, postLimit: number): Promise<ResponseSearchPageDto> {
+  async getSearchPage(keyword: string, userLimit: number, postLimit: number, currentUserId: string): Promise<ResponseSearchPageDto> {
     const { users } = await this.userRepository.getAllUsers({ keyword, limit: userLimit, page: 1 });
-    const { posts } = await this.postRepository.getAllPosts({ keyword, limit: postLimit, page: 1 });
+    const { posts } = await this.postRepository.getAllPosts({ keyword, limit: postLimit, page: 1 }, currentUserId);
     return {
       users,
       posts,
