@@ -24,7 +24,7 @@ export class PostService {
   }
 
   async getPostById(id: string, userId: string): Promise<PostEntity> {
-    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'media', 'likes', 'comments', 'shares', 'saves'] });
+    const post = await this.postRepository.findOne({ where: { id }, relations: ['user', 'media', 'likes', 'comments', 'comments.user', 'shares', 'saves'] });
     if (!post) {
       throw new NotFoundException('Post not found');
     }

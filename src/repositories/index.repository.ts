@@ -4,6 +4,9 @@ import { StoryRepository } from "./story.repository";
 import { UserRepository } from "./user.repository";
 import { MediaRepository } from "./media.repository";
 import { SaveRepository } from "./save.repository";
+import { NotificationRepository } from "./notification.repository";
+import { ConversationRepository } from "./conversation.repository";
+import { MessageRepository } from "./message.repository";
 
 export const Repositories = [
   UserRepository,
@@ -12,4 +15,7 @@ export const Repositories = [
   StoryRepository,
   MediaRepository,
   SaveRepository,
+  NotificationRepository,
+  ConversationRepository,
+  MessageRepository,
 ];

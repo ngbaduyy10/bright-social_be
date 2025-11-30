@@ -21,6 +21,9 @@ import { StoryModule } from './modules/story/story.module';
 import { PageModule } from './modules/page/page.module';
 import { MediaModule } from './modules/media/media.module';
 import { SaveModule } from './modules/save/save.module';
+import { SocketModule } from './modules/socket/socket.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Global()
 @Module({
@@ -73,6 +76,9 @@ import { SaveModule } from './modules/save/save.module';
     PageModule,
     MediaModule,
     SaveModule,
+    SocketModule,
+    ChatModule,
+    NotificationModule,
   ],
   exports: [
     ...Repositories,

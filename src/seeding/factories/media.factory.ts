@@ -22,7 +22,7 @@ export default setSeederFactory(MediaEntity, async (): Promise<MediaEntity> => {
       'https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4'
     ]);
   }
-  media.width = 500;
+  media.width = 700;
   media.height = 500;
   media.type = mediaType;
   media.order = 0;

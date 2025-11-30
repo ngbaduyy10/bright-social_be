@@ -78,10 +78,14 @@ export default class MainSeeder implements Seeder {
           allLikes.push(like);
 
           // Create notification for like
+          const isSeen = Math.random() > 0.5; // Random true/false
           const likeNotification = notificationRepository.create({
             type: NotificationType.LIKE,
             user_id: staticUser.id, // Post owner receives notification
             actor_id: randomActor.id, // User who liked
+            is_seen: isSeen,
+            seen_at: isSeen ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null, // Random date within last 7 days if seen
+            post_id: post.id,
           });
           allNotifications.push(likeNotification);
         }
@@ -96,10 +100,15 @@ export default class MainSeeder implements Seeder {
           allComments.push(comment);
 
           // Create notification for comment
+          const isSeen = Math.random() > 0.5; // Random true/false
           const commentNotification = notificationRepository.create({
             type: NotificationType.COMMENT,
             user_id: staticUser.id, // Post owner receives notification
             actor_id: randomActor.id, // User who commented
+            is_seen: isSeen,
+            seen_at: isSeen ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null, // Random date within last 7 days if seen
+            content: comment.content,
+            post_id: post.id,
           });
           allNotifications.push(commentNotification);
         }
@@ -145,6 +154,7 @@ export default class MainSeeder implements Seeder {
 
     if (otherUsers.length > 0) {
       const friendRelationships: FriendEntity[] = [];
+      const friendRequestNotifications: NotificationEntity[] = [];
 
       // Split users into groups
       const acceptedFriends = otherUsers.slice(0, 30);
@@ -176,6 +186,17 @@ export default class MainSeeder implements Seeder {
           status: FriendStatus.PENDING,
         });
         friendRelationships.push(incomingRequest);
+
+        // Create notification for friend request
+        const isSeen = Math.random() > 0.5; // Random true/false
+        const friendRequestNotification = notificationRepository.create({
+          type: NotificationType.ADD_FRIEND,
+          user_id: staticUser.id, // staticUser receives notification
+          actor_id: otherUser.id, // User who sent friend request
+          is_seen: isSeen,
+          seen_at: isSeen ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null, // Random date within last 7 days if seen
+        });
+        friendRequestNotifications.push(friendRequestNotification);
       }
 
       // Create 5 outgoing sent requests (staticUser sends to others)
@@ -189,6 +210,7 @@ export default class MainSeeder implements Seeder {
       }
 
       await friendRepository.save(friendRelationships);
+      await notificationRepository.save(friendRequestNotifications);
     } else {
       console.log('ℹ️ No other users found to create friendships with');
     }
