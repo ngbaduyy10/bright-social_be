@@ -34,16 +34,6 @@ export class ConversationRepository extends Repository<ConversationEntity> {
     return conversation;
   }
 
-  async getConversationById(conversationId: string, userId: string): Promise<ConversationEntity | null> {
-    return await this.findOne({
-      where: [
-        { id: conversationId, user1_id: userId },
-        { id: conversationId, user2_id: userId },
-      ],
-      relations: ['user1', 'user2', 'last_message', 'last_message.sender'],
-    });
-  }
-
   async updateLastMessage(conversationId: string, messageId: string) {
     await this.update(
       { id: conversationId },
@@ -88,7 +78,7 @@ export class ConversationRepository extends Repository<ConversationEntity> {
       .getOne();
   }
 
-  async getConversationByIdWithMessages(conversationId: string): Promise<ConversationEntity | null> {
+  async getConversationById(conversationId: string): Promise<ConversationEntity | null> {
     return await this
       .createQueryBuilder('conversation')
       .leftJoinAndSelect('conversation.user1', 'user1')

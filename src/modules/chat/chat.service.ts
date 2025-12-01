@@ -18,8 +18,8 @@ export class ChatService {
     return await this.conversationRepository.getOrCreateConversation(user1Id, user2Id);
   }
 
-  async getConversationById(conversationId: string, userId: string): Promise<ConversationEntity> {
-    const conversation = await this.conversationRepository.getConversationById(conversationId, userId);
+  async getConversationById(conversationId: string): Promise<ConversationEntity> {
+    const conversation = await this.conversationRepository.getConversationById(conversationId);
     
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
@@ -29,7 +29,7 @@ export class ChatService {
   }
 
   async createMessage(conversationId: string, senderId: string, content: string): Promise<MessageEntity> {
-    const conversation = await this.conversationRepository.getConversationById(conversationId, senderId);
+    const conversation = await this.conversationRepository.getConversationById(conversationId);
     
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
@@ -53,7 +53,7 @@ export class ChatService {
   }
 
   async markConversationAsSeen(conversationId: string, userId: string): Promise<void> {
-    const conversation = await this.conversationRepository.getConversationById(conversationId, userId);
+    const conversation = await this.conversationRepository.getConversationById(conversationId);
     
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
@@ -72,10 +72,7 @@ export class ChatService {
       throw new NotFoundException('Message not found');
     }
 
-    const conversation = await this.conversationRepository.getConversationById(
-      message.conversation_id,
-      userId
-    );
+    const conversation = await this.conversationRepository.getConversationById(message.conversation_id);
 
     if (!conversation) {
       throw new ForbiddenException('Access denied');
@@ -94,7 +91,7 @@ export class ChatService {
     conversationId: string,
     userId: string,
   ): Promise<MessageEntity[]> {
-    const conversation = await this.conversationRepository.getConversationById(conversationId, userId);
+    const conversation = await this.conversationRepository.getConversationById(conversationId);
     
     if (!conversation) {
       throw new NotFoundException('Conversation not found');
@@ -114,7 +111,7 @@ export class ChatService {
 
     if (!conversation) {
       conversation = await this.conversationRepository.getOrCreateConversation(currentUserId, otherUserId);
-      conversation = await this.conversationRepository.getConversationByIdWithMessages(conversation.id);
+      conversation = await this.conversationRepository.getConversationById(conversation.id);
     }
 
     return conversation;

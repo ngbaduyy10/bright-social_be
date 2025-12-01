@@ -61,7 +61,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      await this.chatService.getConversationById(data.conversationId, userId);
+      await this.chatService.getConversationById(data.conversationId);
       
       client.join(`conversation:${data.conversationId}`);
       
@@ -89,50 +89,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         data.content,
       );
 
-      const conversation = await this.chatService.getConversationById(data.conversationId, userId);
+      const conversation = await this.chatService.getConversationById(data.conversationId);
       const receiverId = conversation.user1_id === userId 
         ? conversation.user2_id 
         : conversation.user1_id;
 
-      const messageResponse = {
-        id: message.id,
-        conversation_id: message.conversation_id,
-        sender_id: message.sender_id,
-        content: message.content,
-        is_seen: message.is_seen,
-        seen_at: message.seen_at,
-        created_at: message.created_at,
-        sender: message.sender ? {
-          id: message.sender.id,
-          username: message.sender.username,
-          first_name: message.sender.first_name,
-          last_name: message.sender.last_name,
-          image: message.sender.image,
-        } : undefined,
-      };
+      this.server.to(`user:${receiverId}`).emit('message_received', message);
+      client.emit('message_received', message);
 
-      this.server.to(`user:${receiverId}`).emit('message_received', messageResponse);
-      
-      client.emit('message_received', messageResponse);
+      this.server.to(`user:${receiverId}`).emit('conversation_updated', conversation);
+      client.emit('conversation_updated', conversation);
 
-      this.server.to(`user:${receiverId}`).emit('conversation_updated', {
-        id: conversation.id,
-        last_message: conversation.last_message ? {
-          id: conversation.last_message.id,
-          content: conversation.last_message.content,
-          created_at: conversation.last_message.created_at,
-        } : null,
-      });
-      client.emit('conversation_updated', {
-        id: conversation.id,
-        last_message: conversation.last_message ? {
-          id: conversation.last_message.id,
-          content: conversation.last_message.content,
-          created_at: conversation.last_message.created_at,
-        } : null,
-      });
-
-      return { success: true, message: messageResponse };
+      return { success: true, message: message };
     } catch (error) {
       return { success: false, message: error.message };
     }
@@ -140,7 +108,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('mark_seen')
   async handleMarkSeen(
-    @MessageBody() data: { conversationId?: string; messageId?: string },
+    @MessageBody() data: { conversationId: string },
     @ConnectedSocket() client: Socket,
   ) {
     const userId = this.connectedUsers.get(client.id);
@@ -150,35 +118,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      if (data.conversationId) {
-        await this.chatService.markConversationAsSeen(data.conversationId, userId);
+      await this.chatService.markConversationAsSeen(data.conversationId, userId);
         
-        const conversation = await this.chatService.getConversationById(data.conversationId, userId);
-        const senderId = conversation.user1_id === userId 
-          ? conversation.user2_id 
-          : conversation.user1_id;
+      const conversation = await this.chatService.getConversationById(data.conversationId);
+      const senderId = conversation.user1_id === userId 
+        ? conversation.user2_id 
+        : conversation.user1_id;
 
-        this.server.to(`user:${senderId}`).emit('message_seen', {
-          conversationId: data.conversationId,
-        });
-      } else if (data.messageId) {
-        const message = await this.chatService.markMessageAsSeen(data.messageId, userId);
-        
-        if (message) {
-          const conversation = await this.chatService.getConversationById(
-            message.conversation_id,
-            userId
-          );
-          const senderId = conversation.user1_id === userId 
-            ? conversation.user2_id 
-            : conversation.user1_id;
-
-          this.server.to(`user:${senderId}`).emit('message_seen', {
-            messageId: data.messageId,
-            conversationId: message.conversation_id,
-          });
-        }
-      }
+      this.server.to(`user:${senderId}`).emit('message_seen', conversation);
 
       return { success: true };
     } catch (error) {
