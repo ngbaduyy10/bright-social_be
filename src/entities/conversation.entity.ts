@@ -11,11 +11,12 @@ export class ConversationEntity extends BaseEntity {
   @Column({ type: 'uuid' })
   user2_id: string;
 
-  @Column({ nullable: true, type: 'text' })
-  last_message: string;
+  @Column({ type: 'uuid', nullable: true })
+  last_message_id: string;
 
-  @Column({ type: 'timestamptz', nullable: true })
-  last_message_at: Date;
+  @ManyToOne(() => MessageEntity)
+  @JoinColumn({ name: 'last_message_id' })
+  last_message: MessageEntity;
 
   @ManyToOne(() => UserEntity)
   @JoinColumn({ name: 'user1_id' })

@@ -40,18 +40,65 @@ export class ConversationRepository extends Repository<ConversationEntity> {
         { id: conversationId, user1_id: userId },
         { id: conversationId, user2_id: userId },
       ],
-      relations: ['user1', 'user2'],
+      relations: ['user1', 'user2', 'last_message', 'last_message.sender'],
     });
   }
 
-  async updateLastMessage(conversationId: string, lastMessage: string) {
+  async updateLastMessage(conversationId: string, messageId: string) {
     await this.update(
       { id: conversationId },
       {
-        last_message: lastMessage,
-        last_message_at: () => 'CURRENT_TIMESTAMP',
+        last_message_id: messageId,
       }
     );
+  }
+
+  async getConversationsByUserId(userId: string): Promise<ConversationEntity[]> {
+    return await this
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.user1', 'user1')
+      .leftJoinAndSelect('conversation.user2', 'user2')
+      .leftJoinAndSelect('conversation.last_message', 'last_message')
+      .leftJoinAndSelect('last_message.sender', 'last_message_sender')
+      .where('(conversation.user1_id = :userId OR conversation.user2_id = :userId)', { userId })
+      .andWhere(
+        `EXISTS (SELECT 1 FROM messages WHERE messages.conversation_id = conversation.id)`
+      )
+      .orderBy('last_message.created_at', 'DESC')
+      .addOrderBy('conversation.created_at', 'DESC')
+      .getMany();
+  }
+
+  async getConversationByUserIds(
+    currentUserId: string,
+    otherUserId: string,
+  ): Promise<ConversationEntity | null> {
+    return await this
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.user1', 'user1')
+      .leftJoinAndSelect('conversation.user2', 'user2')
+      .leftJoinAndSelect('conversation.last_message', 'last_message')
+      .leftJoinAndSelect('conversation.messages', 'messages')
+      .leftJoinAndSelect('messages.sender', 'message_sender')
+      .where('(conversation.user1_id = :currentUserId AND conversation.user2_id = :otherUserId) OR (conversation.user1_id = :otherUserId AND conversation.user2_id = :currentUserId)', {
+        currentUserId,
+        otherUserId,
+      })
+      .orderBy('messages.created_at', 'ASC')
+      .getOne();
+  }
+
+  async getConversationByIdWithMessages(conversationId: string): Promise<ConversationEntity | null> {
+    return await this
+      .createQueryBuilder('conversation')
+      .leftJoinAndSelect('conversation.user1', 'user1')
+      .leftJoinAndSelect('conversation.user2', 'user2')
+      .leftJoinAndSelect('conversation.last_message', 'last_message')
+      .leftJoinAndSelect('conversation.messages', 'messages')
+      .leftJoinAndSelect('messages.sender', 'message_sender')
+      .where('conversation.id = :conversationId', { conversationId })
+      .orderBy('messages.created_at', 'ASC')
+      .getOne();
   }
 }
 

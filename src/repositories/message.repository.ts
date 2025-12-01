@@ -31,5 +31,14 @@ export class MessageRepository extends Repository<MessageEntity> {
       }
     );
   }
+
+  async getMessagesByConversationId(conversationId: string): Promise<MessageEntity[]> {
+    return await this
+      .createQueryBuilder('message')
+      .leftJoinAndSelect('message.sender', 'sender')
+      .where('message.conversation_id = :conversationId', { conversationId })
+      .orderBy('message.created_at', 'ASC')
+      .getMany();
+  }
 }
 

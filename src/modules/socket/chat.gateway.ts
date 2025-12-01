@@ -117,13 +117,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       this.server.to(`user:${receiverId}`).emit('conversation_updated', {
         id: conversation.id,
-        last_message: conversation.last_message,
-        last_message_at: conversation.last_message_at,
+        last_message: conversation.last_message ? {
+          id: conversation.last_message.id,
+          content: conversation.last_message.content,
+          created_at: conversation.last_message.created_at,
+        } : null,
       });
       client.emit('conversation_updated', {
         id: conversation.id,
-        last_message: conversation.last_message,
-        last_message_at: conversation.last_message_at,
+        last_message: conversation.last_message ? {
+          id: conversation.last_message.id,
+          content: conversation.last_message.content,
+          created_at: conversation.last_message.created_at,
+        } : null,
       });
 
       return { success: true, message: messageResponse };

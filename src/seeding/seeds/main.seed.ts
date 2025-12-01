@@ -9,6 +9,8 @@ import { MediaEntity } from '@/entities/media.entity';
 import { LikeEntity } from '@/entities/like.entity';
 import { CommentEntity } from '@/entities/comment.entity';
 import { NotificationEntity } from '@/entities/notification.entity';
+import { ConversationEntity } from '@/entities/conversation.entity';
+import { MessageEntity } from '@/entities/message.entity';
 import { hashPassword } from '@/utils/helpers';
 import { FriendStatus, NotificationType } from '@/utils/constant';
 
@@ -26,6 +28,8 @@ export default class MainSeeder implements Seeder {
     const likeRepository = dataSource.getRepository(LikeEntity);
     const commentRepository = dataSource.getRepository(CommentEntity);
     const notificationRepository = dataSource.getRepository(NotificationEntity);
+    const conversationRepository = dataSource.getRepository(ConversationEntity);
+    const messageRepository = dataSource.getRepository(MessageEntity);
 
     const staticUser = userRepository.create({
       email: 'ngbaduyy05@gmail.com',
@@ -276,7 +280,8 @@ export default class MainSeeder implements Seeder {
       }
 
       // Create 10 incoming friend requests (others send to staticUser)
-      for (const otherUser of friendRequests) {
+      for (let i = 0; i < friendRequests.length; i++) {
+        const otherUser = friendRequests[i];
         const incomingRequest = friendRepository.create({
           user_id: otherUser.id,
           friend_id: staticUser.id,
@@ -285,7 +290,8 @@ export default class MainSeeder implements Seeder {
         friendRelationships.push(incomingRequest);
 
         // Create notification for friend request
-        const isSeen = Math.random() > 0.5; // Random true/false
+        // Only first 8 notifications are unseen, rest are seen
+        const isSeen = i >= 8;
         const friendRequestNotification = notificationRepository.create({
           type: NotificationType.ADD_FRIEND,
           user_id: staticUser.id, // staticUser receives notification
@@ -336,7 +342,8 @@ export default class MainSeeder implements Seeder {
       }
 
       // Create 10 incoming friend requests (others send to staticUser2)
-      for (const otherUser of friendRequests2) {
+      for (let i = 0; i < friendRequests2.length; i++) {
+        const otherUser = friendRequests2[i];
         const incomingRequest = friendRepository.create({
           user_id: otherUser.id,
           friend_id: staticUser2.id,
@@ -345,7 +352,8 @@ export default class MainSeeder implements Seeder {
         friendRelationships2.push(incomingRequest);
 
         // Create notification for friend request
-        const isSeen = Math.random() > 0.5; // Random true/false
+        // Only first 8 notifications are unseen, rest are seen
+        const isSeen = i >= 8;
         const friendRequestNotification = notificationRepository.create({
           type: NotificationType.ADD_FRIEND,
           user_id: staticUser2.id, // staticUser2 receives notification
@@ -404,5 +412,62 @@ export default class MainSeeder implements Seeder {
     } else {
       console.log('ℹ️ No posts found to save');
     }
+
+    // Create conversation between staticUser and staticUser2
+    const [user1Id, user2Id] = [staticUser.id, staticUser2.id].sort();
+    const conversation = conversationRepository.create({
+      user1_id: user1Id,
+      user2_id: user2Id,
+      last_message_id: null,
+    });
+
+    const savedConversation = await conversationRepository.save(conversation);
+
+    // Create 10 messages between the two users
+    const messages: MessageEntity[] = [];
+    const messageContents: string[] = [
+      'Hello!',
+      'Hi there!',
+      'How are you?',
+      'I\'m doing well, thanks!',
+      'The weather is nice today, isn\'t it?',
+      'Yes, it\'s beautiful outside!',
+      'Are you free?',
+      'Yes, I\'m available',
+      'Want to grab coffee?',
+      'OK, see you later!',
+    ];
+
+    // Create base timestamp (2 hours ago, so messages appear in the past)
+    const baseTimestamp = Date.now() - (2 * 60 * 60 * 1000);
+    // Each message will be spaced 1-3 minutes apart
+    const timeBetweenMessages = 60 * 1000; // 1 minute in milliseconds
+
+    for (let i = 0; i < 10; i++) {
+      const senderId = i % 2 === 0 ? staticUser.id : staticUser2.id;
+      // Calculate created_at: each message is sent progressively later
+      const messageCreatedAt = new Date(baseTimestamp + (i * timeBetweenMessages));
+      
+      const message = messageRepository.create({
+        conversation_id: savedConversation.id,
+        sender_id: senderId,
+        content: messageContents[i],
+        is_seen: i < 9 ? Math.random() > 0.3 : false, // Some messages are seen, last one is not seen
+        seen_at: i < 9 && Math.random() > 0.3 
+          ? new Date(messageCreatedAt.getTime() + 30 * 1000) // Seen 30 seconds after sent
+          : null,
+        created_at: messageCreatedAt,
+        updated_at: messageCreatedAt,
+      });
+      messages.push(message);
+    }
+
+    await messageRepository.save(messages);
+
+    // Update conversation with last message
+    const lastMessage = messages[messages.length - 1];
+    await conversationRepository.update(savedConversation.id, {
+      last_message_id: lastMessage.id,
+    });
   }
 }

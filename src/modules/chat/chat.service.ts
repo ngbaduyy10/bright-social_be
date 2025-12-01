@@ -44,7 +44,7 @@ export class ChatService {
 
     const savedMessage = await this.messageRepository.save(message);
 
-    await this.conversationRepository.updateLastMessage(conversationId, content);
+    await this.conversationRepository.updateLastMessage(conversationId, savedMessage.id);
 
     return await this.messageRepository.findOne({
       where: { id: savedMessage.id },
@@ -84,6 +84,58 @@ export class ChatService {
     await this.messageRepository.markMessageAsSeen(messageId, userId);
     
     return message;
+  }
+
+  async getConversationsByUserId(userId: string): Promise<ConversationEntity[]> {
+    return await this.conversationRepository.getConversationsByUserId(userId);
+  }
+
+  async getMessagesByConversationId(
+    conversationId: string,
+    userId: string,
+  ): Promise<MessageEntity[]> {
+    const conversation = await this.conversationRepository.getConversationById(conversationId, userId);
+    
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    return await this.messageRepository.getMessagesByConversationId(conversationId);
+  }
+
+  async getConversationByUserId(
+    otherUserId: string,
+    currentUserId: string,
+  ): Promise<ConversationEntity> {
+    let conversation = await this.conversationRepository.getConversationByUserIds(
+      currentUserId,
+      otherUserId,
+    );
+
+    if (!conversation) {
+      conversation = await this.conversationRepository.getOrCreateConversation(currentUserId, otherUserId);
+      conversation = await this.conversationRepository.getConversationByIdWithMessages(conversation.id);
+    }
+
+    return conversation;
+  }
+
+  async getMessagesByUserId(
+    otherUserId: string,
+    currentUserId: string,
+  ): Promise<MessageEntity[]> {
+    const conversation = await this.conversationRepository.findOne({
+      where: [
+        { user1_id: currentUserId, user2_id: otherUserId },
+        { user1_id: otherUserId, user2_id: currentUserId },
+      ],
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    return await this.messageRepository.getMessagesByConversationId(conversation.id);
   }
 }
 
