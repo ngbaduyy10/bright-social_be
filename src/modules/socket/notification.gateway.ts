@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { NotificationService } from '../notification/notification.service';
 import { NotificationEntity } from '@/entities/notification.entity';
+import { ConfigService } from '@nestjs/config';
 
 @WebSocketGateway({
   namespace: '/notification',
@@ -25,12 +26,16 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   constructor(
     private jwtService: JwtService,
     private notificationService: NotificationService,
+    private configService: ConfigService,
   ) {}
 
   async handleConnection(client: Socket) {
     try {
       const token = client.handshake.auth.token;
-      const payload = await this.jwtService.verifyAsync(token);
+      const jwtSecret = this.configService.get<string>('JWT_SECRET');
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: jwtSecret,
+      });
       
       this.connectedUsers.set(client.id, payload.id);
       client.join(`user:${payload.id}`);

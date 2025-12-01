@@ -34,6 +34,12 @@ export class PostService {
     } else {
       post.is_saved = false;
     }
+
+    if (userId && post.likes) {
+      post.is_liked = post.likes.some(like => like.user_id === userId);
+    } else {
+      post.is_liked = false;
+    }
     
     return post;
   }

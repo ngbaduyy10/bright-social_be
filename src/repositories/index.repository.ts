@@ -7,6 +7,8 @@ import { SaveRepository } from "./save.repository";
 import { NotificationRepository } from "./notification.repository";
 import { ConversationRepository } from "./conversation.repository";
 import { MessageRepository } from "./message.repository";
+import { LikeRepository } from "./like.repository";
+import { CommentRepository } from "./comment.repository";
 
 export const Repositories = [
   UserRepository,
@@ -18,4 +20,6 @@ export const Repositories = [
   NotificationRepository,
   ConversationRepository,
   MessageRepository,
+  LikeRepository,
+  CommentRepository,
 ];

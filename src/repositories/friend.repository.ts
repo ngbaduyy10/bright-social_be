@@ -14,6 +14,7 @@ export class FriendRepository extends Repository<FriendEntity> {
       .createQueryBuilder('friend')
       .where('friend.status = :status', { status: FriendStatus.ACCEPTED })
       .andWhere('(friend.user_id = :userId)', { userId })
+      .orderBy('friend.created_at', 'DESC')
       .getMany();
 
     return friends;
@@ -26,6 +27,7 @@ export class FriendRepository extends Repository<FriendEntity> {
       .leftJoinAndSelect('friend.friend', 'friendUser')
       .where('friend.status = :status', { status: FriendStatus.ACCEPTED })
       .andWhere('(friend.user_id = :userId)', { userId })
+      .orderBy('friend.created_at', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -40,6 +42,7 @@ export class FriendRepository extends Repository<FriendEntity> {
       .leftJoinAndSelect('friend.user', 'users')
       .where('friend.status = :status', { status: FriendStatus.PENDING })
       .andWhere('(friend.friend_id = :userId)', { userId })
+      .orderBy('friend.created_at', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -54,6 +57,7 @@ export class FriendRepository extends Repository<FriendEntity> {
       .leftJoinAndSelect('friend.friend', 'friendUser')
       .where('friend.status = :status', { status: FriendStatus.PENDING })
       .andWhere('(friend.user_id = :userId)', { userId })
+      .orderBy('friend.created_at', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();

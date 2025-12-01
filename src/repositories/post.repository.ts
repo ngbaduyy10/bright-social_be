@@ -34,6 +34,16 @@ export class PostRepository extends Repository<PostEntity> {
     });
   }
 
+  private setLikedStatus(posts: PostEntity[], userId?: string | null): void {
+    posts.forEach(post => {
+      if (userId) {
+        post.is_liked = post.likes?.some(like => like.user_id === userId) || false;
+      } else {
+        post.is_liked = false;
+      }
+    });
+  }
+
   async getAllPosts(filter: Filter, userId: string) {
     const offset = (filter.page - 1) * filter.limit;
     const query = this.applyCommonJoins(this.createQueryBuilder('post'));
@@ -48,6 +58,7 @@ export class PostRepository extends Repository<PostEntity> {
 
     const [posts, total] = await query.getManyAndCount();
     this.setSavedStatus(posts, userId);
+    this.setLikedStatus(posts, userId);
     
     return { posts, total };
   }
@@ -63,6 +74,7 @@ export class PostRepository extends Repository<PostEntity> {
     
     const [posts, total] = await query.getManyAndCount();
     this.setSavedStatus(posts, currentUserId);
+    this.setLikedStatus(posts, currentUserId);
     
     return { posts, total };
   }
@@ -78,6 +90,7 @@ export class PostRepository extends Repository<PostEntity> {
     
     const [posts, total] = await query.getManyAndCount();
     this.setSavedStatus(posts, currentUserId);
+    this.setLikedStatus(posts, currentUserId);
     
     return { posts, total };
   }
@@ -93,6 +106,7 @@ export class PostRepository extends Repository<PostEntity> {
     
     const [posts, total] = await query.getManyAndCount();
     this.setSavedStatus(posts, null, true);
+    this.setLikedStatus(posts, userId);
     
     return { posts, total };
   }

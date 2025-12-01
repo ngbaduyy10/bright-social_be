@@ -24,6 +24,8 @@ import { SaveModule } from './modules/save/save.module';
 import { SocketModule } from './modules/socket/socket.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { LikeModule } from './modules/like/like.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Global()
 @Module({
@@ -79,6 +81,8 @@ import { NotificationModule } from './modules/notification/notification.module';
     SocketModule,
     ChatModule,
     NotificationModule,
+    LikeModule,
+    CommentModule,
   ],
   exports: [
     ...Repositories,

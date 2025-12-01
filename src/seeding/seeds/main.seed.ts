@@ -43,6 +43,22 @@ export default class MainSeeder implements Seeder {
 
     await userRepository.save(staticUser);
 
+    const staticUser2 = userRepository.create({
+      email: 'ngbaduyy10@gmail.com',
+      first_name: 'Ba',
+      last_name: 'Duy',
+      username: 'ngbaduyy10',
+      password: await hashPassword('123456'),
+      gender: null,
+      phone: null,
+      image: null,
+      cover_image: null,
+      bio: null,
+      is_verified: true,
+    });
+
+    await userRepository.save(staticUser2);
+
     // Create 3 posts for the static user using factory
     const postFactory = factoryManager.get(PostEntity);
     const posts: PostEntity[] = [];
@@ -55,9 +71,20 @@ export default class MainSeeder implements Seeder {
 
     await postRepository.save(posts);
 
+    // Create 3 posts for the static user 2 using factory
+    const posts2: PostEntity[] = [];
+    
+    for (let i = 0; i < 3; i++) {
+      const post = await postFactory.make();
+      post.user_id = staticUser2.id;
+      posts2.push(post);
+    }
+
+    await postRepository.save(posts2);
+
     // Get all users to use as actors for likes, comments, and notifications
     const allUsersForActions = await userRepository.find();
-    const otherUsersForActions = allUsersForActions.filter(user => user.id !== staticUser.id);
+    const otherUsersForActions = allUsersForActions.filter(user => user.id !== staticUser.id && user.id !== staticUser2.id);
 
     // Create likes, comments, and notifications for each post
     if (otherUsersForActions.length > 0) {
@@ -114,6 +141,54 @@ export default class MainSeeder implements Seeder {
         }
       }
 
+      // Create likes, comments, and notifications for staticUser2 posts
+      for (const post of posts2) {
+        // Create 10-12 likes for each post
+        const numLikes = Math.floor(Math.random() * 3) + 10; // Random between 10-12
+        for (let i = 0; i < numLikes; i++) {
+          const like = await likeFactory.make();
+          const randomActor = otherUsersForActions[Math.floor(Math.random() * otherUsersForActions.length)];
+          like.post_id = post.id;
+          like.user_id = randomActor.id;
+          allLikes.push(like);
+
+          // Create notification for like
+          const isSeen = Math.random() > 0.5; // Random true/false
+          const likeNotification = notificationRepository.create({
+            type: NotificationType.LIKE,
+            user_id: staticUser2.id, // Post owner receives notification
+            actor_id: randomActor.id, // User who liked
+            is_seen: isSeen,
+            seen_at: isSeen ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null, // Random date within last 7 days if seen
+            post_id: post.id,
+          });
+          allNotifications.push(likeNotification);
+        }
+
+        // Create 1-3 comments for each post
+        const numComments = Math.floor(Math.random() * 3) + 1; // Random between 1-3
+        for (let i = 0; i < numComments; i++) {
+          const comment = await commentFactory.make();
+          const randomActor = otherUsersForActions[Math.floor(Math.random() * otherUsersForActions.length)];
+          comment.post_id = post.id;
+          comment.user_id = randomActor.id;
+          allComments.push(comment);
+
+          // Create notification for comment
+          const isSeen = Math.random() > 0.5; // Random true/false
+          const commentNotification = notificationRepository.create({
+            type: NotificationType.COMMENT,
+            user_id: staticUser2.id, // Post owner receives notification
+            actor_id: randomActor.id, // User who commented
+            is_seen: isSeen,
+            seen_at: isSeen ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null, // Random date within last 7 days if seen
+            content: comment.content,
+            post_id: post.id,
+          });
+          allNotifications.push(commentNotification);
+        }
+      }
+
       await likeRepository.save(allLikes);
       await commentRepository.save(allComments);
       await notificationRepository.save(allNotifications);
@@ -135,6 +210,17 @@ export default class MainSeeder implements Seeder {
       }
     }
 
+    // Create 2 media items for each post2 using factory
+    for (const post of posts2) {
+      for (let i = 0; i < 2; i++) {
+        const media = await mediaFactory.make();
+        media.user_id = staticUser2.id;
+        media.post_id = post.id;
+        media.order = i;
+        allMedia.push(media);
+      }
+    }
+
     await mediaRepository.save(allMedia);
 
     // Create 2 stories for the static user using factory
@@ -149,8 +235,19 @@ export default class MainSeeder implements Seeder {
 
     await storyRepository.save(stories);
 
+    // Create 2 stories for the static user 2 using factory
+    const stories2: StoryEntity[] = [];
+
+    for (let i = 0; i < 2; i++) {
+      const story = await storyFactory.make();
+      story.user_id = staticUser2.id;
+      stories2.push(story);
+    }
+
+    await storyRepository.save(stories2);
+
     const allUsers = await userRepository.find();
-    const otherUsers = allUsers.filter(user => user.id !== staticUser.id);
+    const otherUsers = allUsers.filter(user => user.id !== staticUser.id && user.id !== staticUser2.id);
 
     if (otherUsers.length > 0) {
       const friendRelationships: FriendEntity[] = [];
@@ -211,6 +308,66 @@ export default class MainSeeder implements Seeder {
 
       await friendRepository.save(friendRelationships);
       await notificationRepository.save(friendRequestNotifications);
+
+      // Create friend relationships for staticUser2
+      const friendRelationships2: FriendEntity[] = [];
+      const friendRequestNotifications2: NotificationEntity[] = [];
+
+      // Split users into groups for staticUser2
+      const acceptedFriends2 = otherUsers.slice(0, 30);
+      const friendRequests2 = otherUsers.slice(30, 40);
+      const sentRequests2 = otherUsers.slice(40, 45); 
+
+      // Create 30 accepted friendships (bidirectional) for staticUser2
+      for (const otherUser of acceptedFriends2) {
+        const friendship1 = friendRepository.create({
+          user_id: staticUser2.id,
+          friend_id: otherUser.id,
+          status: FriendStatus.ACCEPTED,
+        });
+        friendRelationships2.push(friendship1);
+
+        const friendship2 = friendRepository.create({
+          user_id: otherUser.id,
+          friend_id: staticUser2.id,
+          status: FriendStatus.ACCEPTED,
+        });
+        friendRelationships2.push(friendship2);
+      }
+
+      // Create 10 incoming friend requests (others send to staticUser2)
+      for (const otherUser of friendRequests2) {
+        const incomingRequest = friendRepository.create({
+          user_id: otherUser.id,
+          friend_id: staticUser2.id,
+          status: FriendStatus.PENDING,
+        });
+        friendRelationships2.push(incomingRequest);
+
+        // Create notification for friend request
+        const isSeen = Math.random() > 0.5; // Random true/false
+        const friendRequestNotification = notificationRepository.create({
+          type: NotificationType.ADD_FRIEND,
+          user_id: staticUser2.id, // staticUser2 receives notification
+          actor_id: otherUser.id, // User who sent friend request
+          is_seen: isSeen,
+          seen_at: isSeen ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000) : null, // Random date within last 7 days if seen
+        });
+        friendRequestNotifications2.push(friendRequestNotification);
+      }
+
+      // Create 5 outgoing sent requests (staticUser2 sends to others)
+      for (const otherUser of sentRequests2) {
+        const sentRequest = friendRepository.create({
+          user_id: staticUser2.id,
+          friend_id: otherUser.id,
+          status: FriendStatus.PENDING,
+        });
+        friendRelationships2.push(sentRequest);
+      }
+
+      await friendRepository.save(friendRelationships2);
+      await notificationRepository.save(friendRequestNotifications2);
     } else {
       console.log('ℹ️ No other users found to create friendships with');
     }
@@ -230,6 +387,20 @@ export default class MainSeeder implements Seeder {
       }
 
       await saveRepository.save(savedPosts);
+
+      // Create saved posts for staticUser2
+      const savedPosts2: SaveEntity[] = [];
+      const postsToSave2 = allPosts.slice(0, Math.min(7, allPosts.length));
+
+      for (const post of postsToSave2) {
+        const savePost = saveRepository.create({
+          user_id: staticUser2.id,
+          post_id: post.id,
+        });
+        savedPosts2.push(savePost);
+      }
+
+      await saveRepository.save(savedPosts2);
     } else {
       console.log('ℹ️ No posts found to save');
     }

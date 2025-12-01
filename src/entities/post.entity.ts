@@ -35,4 +35,6 @@ export class PostEntity extends BaseEntity {
   saves: SaveEntity[];
 
   is_saved?: boolean;
+
+  is_liked?: boolean;
 }
