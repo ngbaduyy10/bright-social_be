@@ -1,11 +1,21 @@
-import { Controller, Get, Param, Query, Request } from '@nestjs/common';
+import { Controller, Get, Param, Query, Request, Post, Body } from '@nestjs/common';
+import { CreatePostDto } from './dto/create-post.dto';
 import { PostService } from './post.service';
 import { JwtUserDto } from '../auth/dto/jwt-user.dto';
 import { PostEntity } from '@/entities/post.entity';
 
 @Controller('post')
 export class PostController {
-  constructor(private readonly postService: PostService) {}
+  constructor(private readonly postService: PostService) { }
+
+
+  @Post()
+  async create(
+    @Body() createPostDto: CreatePostDto,
+    @Request() req: { user: JwtUserDto }
+  ): Promise<PostEntity> {
+    return await this.postService.create(createPostDto, req.user.id);
+  }
 
   @Get()
   async findAll(
@@ -19,8 +29,8 @@ export class PostController {
 
   @Get('friend')
   async getPostsByFriends(
-    @Request() req: { user: JwtUserDto }, 
-    @Query('page') page: number, 
+    @Request() req: { user: JwtUserDto },
+    @Query('page') page: number,
     @Query('limit') limit: number
   ): Promise<PaginatedResponse<PostEntity[]>> {
     return await this.postService.getPostsByFriends(req.user.id, page, limit);
@@ -28,8 +38,8 @@ export class PostController {
 
   @Get('saved')
   async getSavedPosts(
-    @Request() req: { user: JwtUserDto }, 
-    @Query('page') page: number, 
+    @Request() req: { user: JwtUserDto },
+    @Query('page') page: number,
     @Query('limit') limit: number,
     @Query('order') order?: 'asc' | 'desc'
   ): Promise<PaginatedResponse<PostEntity[]>> {
