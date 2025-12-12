@@ -32,7 +32,13 @@ export class UserEntity extends BaseEntity {
   image: string;
 
   @Column({ nullable: true })
+  image_public_id: string;
+
+  @Column({ nullable: true })
   cover_image: string;
+
+  @Column({ nullable: true })
+  cover_image_public_id: string;
 
   @Column({ nullable: true })
   bio: string;

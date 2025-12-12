@@ -34,4 +34,7 @@ export class MediaEntity extends BaseEntity {
   @ManyToOne(() => PostEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
+
+  @Column({ nullable: true })
+  public_id: string;
 }

@@ -1,14 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PostRepository } from '@/repositories/post.repository';
 import { PostEntity } from '@/entities/post.entity';
 import { FriendRepository } from '@/repositories/friend.repository';
-import { Filter } from '@/utils/constant';
+import { MediaRepository } from '@/repositories/media.repository';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Filter, MediaType } from '@/utils/constant';
+import { MediaEntity } from '@/entities/media.entity';
 
 @Injectable()
 export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly friendRepository: FriendRepository,
+    private readonly mediaRepository: MediaRepository,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findAll(filter: Filter, userId: string): Promise<PaginatedResponse<PostEntity[]>> {
@@ -91,5 +96,73 @@ export class PostService {
       totalPages: Math.ceil(total / limit),
     };
     return { data: posts, meta };
+  }
+
+  async createPost(
+    userId: string,
+    content?: string,
+    files?: Express.Multer.File[],
+  ): Promise<PostEntity> {
+    if (!content && (!files || files.length === 0)) {
+      throw new BadRequestException('Post must have either content or images');
+    }
+
+    const post = this.postRepository.create({
+      user_id: userId,
+      content: content || null,
+    });
+    const savedPost = await this.postRepository.save(post);
+
+    if (files && files.length > 0) {
+      const uploadResults = await this.cloudinaryService.uploadMultipleImages(files);
+      
+      const mediaEntities: MediaEntity[] = uploadResults.map((result, index) => {
+        return this.mediaRepository.create({
+          url: result.secure_url,
+          type: MediaType.IMAGE,
+          width: result.width,
+          height: result.height,
+          order: index + 1,
+          user_id: userId,
+          post_id: savedPost.id,
+          public_id: result.public_id,
+        });
+      });
+
+      await this.mediaRepository.save(mediaEntities);
+    }
+
+    return this.getPostById(savedPost.id, userId);
+  }
+
+  async deletePost(postId: string, userId: string): Promise<void> {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+      relations: ['media'],
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    if (post.user_id !== userId) {
+      throw new BadRequestException('You can only delete your own posts');
+    }
+
+    if (post.media && post.media.length > 0) {
+      const publicIds = post.media
+        .map((media) => media.public_id)
+        .filter((id) => id);
+
+      if (publicIds.length > 0) {
+        try {
+          await this.cloudinaryService.deleteMultipleImages(publicIds);
+        } catch (error) {
+          console.error('Error deleting images from Cloudinary:', error);
+        }
+      }
+    }
+
+    await this.postRepository.remove(post);
   }
 }

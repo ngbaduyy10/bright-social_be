@@ -1,10 +1,12 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { comparePasswords, hashPassword } from '@/utils/helpers';
 import { CacheService } from '@/config/cache';
 import { PREFIX_USER_CACHE } from '@/utils/cacheVariables';
 import { UserRepository } from '@/repositories/user.repository';
 import { UserEntity } from '@/entities/user.entity';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Filter } from '@/utils/constant';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly cacheService: CacheService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -110,5 +113,85 @@ export class UserService {
     };
     
     return { data: users, meta };
+  }
+
+  async findOneById(userId: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
+  }
+
+  async updateUser(
+    userId: string,
+    updateUserDto: UpdateUserDto,
+    imageFile?: Express.Multer.File,
+    coverImageFile?: Express.Multer.File,
+  ): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (updateUserDto.username) {
+      if (updateUserDto.username !== user.username) {
+        const existingUser = await this.userRepository.findOne({
+          where: { username: updateUserDto.username },
+        });
+
+        if (existingUser) {
+          throw new BadRequestException('Username already exists');
+        }
+
+        await this.cacheService.removeKey(PREFIX_USER_CACHE, user.username);
+        
+        user.username = updateUserDto.username;
+      }
+    }
+
+    if (updateUserDto.first_name) user.first_name = updateUserDto.first_name;
+    if (updateUserDto.last_name) user.last_name = updateUserDto.last_name;
+    if (updateUserDto.gender) user.gender = updateUserDto.gender;
+    if (updateUserDto.phone !== undefined) user.phone = updateUserDto.phone;
+    if (updateUserDto.bio !== undefined) user.bio = updateUserDto.bio;
+
+    if (imageFile) {
+      if (user.image_public_id) {
+        try {
+          await this.cloudinaryService.deleteImage(user.image_public_id);
+        } catch (error) {
+          console.error('Error deleting old image from Cloudinary:', error);
+        }
+      }
+
+      const uploadResult = await this.cloudinaryService.uploadImage(imageFile);
+      user.image = uploadResult.secure_url;
+      user.image_public_id = uploadResult.public_id;
+    }
+
+    if (coverImageFile) {
+      if (user.cover_image_public_id) {
+        try {
+          await this.cloudinaryService.deleteImage(user.cover_image_public_id);
+        } catch (error) {
+          console.error('Error deleting old cover image from Cloudinary:', error);
+        }
+      }
+
+      const uploadResult = await this.cloudinaryService.uploadImage(coverImageFile);
+      user.cover_image = uploadResult.secure_url;
+      user.cover_image_public_id = uploadResult.public_id;
+    }
+
+    await this.cacheService.removeKey(PREFIX_USER_CACHE, user.username);
+
+    await this.userRepository.save(user);
+    return user;
   }
 }

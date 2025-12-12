@@ -1,7 +1,9 @@
-import { Controller, Get, Param, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, Request, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { PostService } from './post.service';
 import { JwtUserDto } from '../auth/dto/jwt-user.dto';
 import { PostEntity } from '@/entities/post.entity';
+import { CreatePostDto } from './dto/create-post.dto';
 
 @Controller('post')
 export class PostController {
@@ -53,5 +55,28 @@ export class PostController {
     @Request() req: { user: JwtUserDto }
   ): Promise<PostEntity> {
     return await this.postService.getPostById(id, req.user.id);
+  }
+
+  @Post()
+  @UseInterceptors(FilesInterceptor('media', 10, { limits: { fileSize: 5 * 1024 * 1024 } }))
+  async createPost(
+    @Request() req: { user: JwtUserDto },
+    @Body() createPostDto: CreatePostDto,
+    @UploadedFiles() files?: Express.Multer.File[],
+  ): Promise<PostEntity> {
+    return await this.postService.createPost(
+      req.user.id,
+      createPostDto.content,
+      files,
+    );
+  }
+
+  @Delete(':id')
+  async deletePost(
+    @Param('id') id: string,
+    @Request() req: { user: JwtUserDto },
+  ): Promise<{ message: string }> {
+    await this.postService.deletePost(id, req.user.id);
+    return { message: 'Post deleted successfully' };
   }
 }
