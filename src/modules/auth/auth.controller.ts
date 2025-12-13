@@ -26,4 +26,10 @@ export class AuthController {
   googleLogin(@Body() googleData: GoogleLoginDto) {
     return this.authService.googleLogin(googleData);
   }
+
+  @Post('admin/login')
+  @Public()
+  adminLogin(@Body() adminData: LoginDto) {
+    return this.authService.adminLogin(adminData);
+  }
 }

@@ -14,6 +14,8 @@ import MediaSeeder from './seeds/media.seed';
 import MediaFactory from './factories/media.factory';
 import LikeFactory from './factories/like.factory';
 import CommentFactory from './factories/comment.factory';
+import AdminFactory from './factories/admin.factory';
+import AdminSeeder from './seeds/admin.seed';
 import MainSeeder from './seeds/main.seed';
 
 (async () => {
@@ -21,8 +23,8 @@ import MainSeeder from './seeds/main.seed';
         ...databaseConfig,
         dropSchema: true,
         synchronize: true,
-        seeds: [UserSeeder, PostSeeder, MediaSeeder, StorySeeder, FriendSeeder, MainSeeder],
-        factories: [UserFactory, PostFactory, MediaFactory, StoryFactory, FriendFactory, LikeFactory, CommentFactory]
+        seeds: [UserSeeder, PostSeeder, MediaSeeder, StorySeeder, FriendSeeder, AdminSeeder, MainSeeder],
+        factories: [UserFactory, PostFactory, MediaFactory, StoryFactory, FriendFactory, LikeFactory, CommentFactory, AdminFactory]
     };
 
     const dataSource = new DataSource(options);

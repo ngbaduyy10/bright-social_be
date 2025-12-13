@@ -27,6 +27,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { LikeModule } from './modules/like/like.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Global()
 @Module({
@@ -85,6 +86,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
     LikeModule,
     CommentModule,
     CloudinaryModule,
+    AdminModule,
   ],
   exports: [
     ...Repositories,

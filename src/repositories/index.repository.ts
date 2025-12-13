@@ -9,6 +9,7 @@ import { ConversationRepository } from "./conversation.repository";
 import { MessageRepository } from "./message.repository";
 import { LikeRepository } from "./like.repository";
 import { CommentRepository } from "./comment.repository";
+import { AdminRepository } from "./admin.repository";
 
 export const Repositories = [
   UserRepository,
@@ -22,4 +23,5 @@ export const Repositories = [
   MessageRepository,
   LikeRepository,
   CommentRepository,
+  AdminRepository,
 ];

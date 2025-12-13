@@ -11,8 +11,9 @@ import { CommentEntity } from '@/entities/comment.entity';
 import { NotificationEntity } from '@/entities/notification.entity';
 import { ConversationEntity } from '@/entities/conversation.entity';
 import { MessageEntity } from '@/entities/message.entity';
+import { AdminEntity } from '@/entities/admin.entity';
 import { hashPassword } from '@/utils/helpers';
-import { FriendStatus, NotificationType } from '@/utils/constant';
+import { FriendStatus, NotificationType, AdminRole } from '@/utils/constant';
 
 export default class MainSeeder implements Seeder {
   public async run(
@@ -30,6 +31,7 @@ export default class MainSeeder implements Seeder {
     const notificationRepository = dataSource.getRepository(NotificationEntity);
     const conversationRepository = dataSource.getRepository(ConversationEntity);
     const messageRepository = dataSource.getRepository(MessageEntity);
+    const adminRepository = dataSource.getRepository(AdminEntity);
 
     const staticUser = userRepository.create({
       email: 'ngbaduyy05@gmail.com',
@@ -62,6 +64,20 @@ export default class MainSeeder implements Seeder {
     });
 
     await userRepository.save(staticUser2);
+
+    // Create admin with email ngbaduyy05
+    const staticAdmin = adminRepository.create({
+      email: 'ngbaduyy05@gmail.com',
+      username: 'ngbaduyy05',
+      password: await hashPassword('123456'),
+      first_name: 'Duy',
+      last_name: 'Nguyen',
+      role: AdminRole.SUPER_ADMIN,
+      gender: null,
+      image: null,
+    });
+
+    await adminRepository.save(staticAdmin);
 
     // Create 3 posts for the static user using factory
     const postFactory = factoryManager.get(PostEntity);

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
+import { AdminService } from '../admin/admin.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
@@ -10,6 +11,7 @@ import { UserRepository } from '@/repositories/user.repository';
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
+    private readonly adminService: AdminService,
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
   ) {}
@@ -29,6 +31,7 @@ export class AuthService {
       username: user.username,
       first_name: user.first_name,
       last_name: user.last_name,
+      role: 'user',
     };
 
     const token = this.jwtService.sign(payload);
@@ -49,6 +52,7 @@ export class AuthService {
         username: user.username,
         first_name: user.first_name,
         last_name: user.last_name,
+        role: 'user',
       };
       
       const token = this.jwtService.sign(payload);
@@ -72,6 +76,7 @@ export class AuthService {
         username: newUser.username,
         first_name: newUser.first_name,
         last_name: newUser.last_name,
+        role: 'user',
       };
       
       const token = this.jwtService.sign(payload);
@@ -80,5 +85,26 @@ export class AuthService {
         user: newUser,
       };
     }
+  }
+
+  async adminLogin(adminData: LoginDto) {
+    const admin = await this.adminService.validateAdmin(
+      adminData.email,
+      adminData.password,
+    );
+    const payload = {
+      id: admin.id,
+      email: admin.email,
+      username: admin.username,
+      first_name: admin.first_name,
+      last_name: admin.last_name,
+      role: admin.role,
+    };
+
+    const token = this.jwtService.sign(payload);
+    return {
+      access_token: token,
+      admin: admin,
+    };
   }
 }
