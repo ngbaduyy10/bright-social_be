@@ -135,6 +135,36 @@ export class PostService {
     return this.getPostById(savedPost.id, userId);
   }
 
+  async activatePost(postId: string, userId: string): Promise<PostEntity> {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    post.is_active = true;
+    await this.postRepository.save(post);
+    
+    return this.getPostById(postId, userId);
+  }
+
+  async deactivatePost(postId: string, userId: string): Promise<PostEntity> {
+    const post = await this.postRepository.findOne({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException('Post not found');
+    }
+
+    post.is_active = false;
+    await this.postRepository.save(post);
+    
+    return this.getPostById(postId, userId);
+  }
+
   async deletePost(postId: string, userId: string): Promise<void> {
     const post = await this.postRepository.findOne({
       where: { id: postId },

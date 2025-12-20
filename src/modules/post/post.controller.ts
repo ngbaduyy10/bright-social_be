@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Delete, Param, Query, Request, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Patch, Param, Query, Request, Body, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { PostService } from './post.service';
 import { JwtUserDto } from '../auth/dto/jwt-user.dto';
@@ -69,6 +69,22 @@ export class PostController {
       createPostDto.content,
       files,
     );
+  }
+
+  @Patch(':id/active')
+  async activatePost(
+    @Param('id') id: string,
+    @Request() req: { user: JwtUserDto },
+  ): Promise<PostEntity> {
+    return await this.postService.activatePost(id, req.user.id);
+  }
+
+  @Patch(':id/inactive')
+  async deactivatePost(
+    @Param('id') id: string,
+    @Request() req: { user: JwtUserDto },
+  ): Promise<PostEntity> {
+    return await this.postService.deactivatePost(id, req.user.id);
   }
 
   @Delete(':id')

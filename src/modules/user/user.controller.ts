@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Query, Request, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Query, Request, UseInterceptors, UploadedFiles, Param } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -32,6 +32,16 @@ export class UserController {
     @Query('page') page: number,
   ) {
     return this.userService.findAll({ keyword, limit, page });
+  }
+
+  @Patch(':id/active')
+  async activateUser(@Param('id') id: string) {
+    return await this.userService.activateUser(id);
+  }
+
+  @Patch(':id/inactive')
+  async deactivateUser(@Param('id') id: string) {
+    return await this.userService.deactivateUser(id);
   }
 
   @Patch()

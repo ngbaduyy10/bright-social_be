@@ -21,7 +21,11 @@ export class UserRepository extends Repository<UserEntity> {
       );
     }
 
-    query.skip(offset).take(filter.limit);
+    query
+      .orderBy('user.created_at', 'DESC')
+      .addOrderBy('user.id', 'DESC')
+      .skip(offset)
+      .take(filter.limit);
 
     const [users, total] = await query.getManyAndCount();
     return { users, total };

@@ -54,7 +54,11 @@ export class PostRepository extends Repository<PostEntity> {
       });
     }
 
-    query.skip(offset).take(filter.limit);
+    query
+      .orderBy('post.created_at', 'DESC')
+      .addOrderBy('post.id', 'DESC')
+      .skip(offset)
+      .take(filter.limit);
 
     const [posts, total] = await query.getManyAndCount();
     this.setSavedStatus(posts, userId);

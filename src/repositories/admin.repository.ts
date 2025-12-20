@@ -30,7 +30,11 @@ export class AdminRepository extends Repository<AdminEntity> {
       `, { keyword: `%${filter.keyword.toLowerCase()}%` });
     }
 
-    query.skip(offset).take(filter.limit);
+    query
+      .orderBy('admin.created_at', 'DESC')
+      .addOrderBy('admin.id', 'DESC')
+      .skip(offset)
+      .take(filter.limit);
 
     const [admins, total] = await query.getManyAndCount();
     return { admins, total };

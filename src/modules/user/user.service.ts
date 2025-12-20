@@ -194,4 +194,32 @@ export class UserService {
     await this.userRepository.save(user);
     return user;
   }
+
+  async activateUser(userId: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.is_active = true;
+    await this.userRepository.save(user);
+    await this.cacheService.removeKey(PREFIX_USER_CACHE, user.username);
+    
+    return user;
+  }
+
+  async deactivateUser(userId: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.is_active = false;
+    await this.userRepository.save(user);
+    await this.cacheService.removeKey(PREFIX_USER_CACHE, user.username);
+    
+    return user;
+  }
 }
