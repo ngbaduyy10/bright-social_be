@@ -122,7 +122,7 @@ export class PostService {
           type: MediaType.IMAGE,
           width: result.width,
           height: result.height,
-          order: index + 1,
+          order: index,
           user_id: userId,
           post_id: savedPost.id,
           public_id: result.public_id,
